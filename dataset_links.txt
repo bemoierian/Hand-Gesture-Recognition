@@ -1,3 +1,8 @@
 Hand Gesture of the COLOMbian Sign Language:
 https://www.kaggle.com/datasets/evernext10/hand-gesture-of-the-colombian-sign-language
 I extacted only the numbers from 0 to 5 (6 classes).
+
+
+***********
+Projec Link in drive:
+https://drive.google.com/drive/folders/1FTZUSBPy2NIb2hibJ-SB_cFT3ENzx6td
