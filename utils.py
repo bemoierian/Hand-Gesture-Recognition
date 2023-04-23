@@ -24,6 +24,7 @@ class Utils:
         #     skinMask, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 355, 5)
 
         return thresh1
+
     @staticmethod
     def loadKmeansModel():
         # Load kmeans model
@@ -31,6 +32,7 @@ class Utils:
         filename1 = 'kmeans_model.sav'
         k_means = pickle.load(open(filename1, 'rb'))
         return k_means
+
     @staticmethod
     def loadSVMModel():
         # Load SVM model
@@ -38,3 +40,13 @@ class Utils:
         filename2 = 'gestures_model.sav'
         clf = pickle.load(open(filename2, 'rb'))
         return clf
+
+    @staticmethod
+    def extractInteger(filename):
+        # print(filename)
+        k = 0
+        try:
+            k = int(filename.split('.')[0].split('(')[1].split(')')[0])
+        except:
+            k = 0
+        return k

@@ -51,14 +51,15 @@ def processImages(imgsPath, classeStartIndex, classeEndIndex, imgStartIndex, img
             # Draw predicted class on image and save it
             cv.rectangle(img, (5, 5), (500, 100), (175, 0, 175), cv.FILLED)
             cv.putText(img, f'{predictedClass}', (40, 80),
-                            cv.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 6)
-            outPath = os.path.join(outputPath, f'{g}_men ({i}).JPG')
+                            cv.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 6)
+            outPath = os.path.join(
+                outputPath, f'{g}{"_men" if imgsPath == menPath else "_woman"} ({i}).JPG')
             cv.imwrite(outPath, img)
 
 
-processImages(menPath, 0, 6, 1, 3)
-processImages(womenPath, 0, 6, 1, 3)
-print(f"y_true: {y_true}")
-print(f"y_predict: {y_predict}")
+processImages(menPath, 0, 6, 61, 71)
+processImages(womenPath, 0, 6, 61, 71)
+# print(f"y_true: {y_true}")
+# print(f"y_predict: {y_predict}")
 accuracy = accuracy_score(y_true, y_predict)
 print(f"Accuracy: {accuracy}")

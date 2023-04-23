@@ -6,10 +6,10 @@ from sklearn import cluster
 import pickle
 from utils import Utils
 
-menPath = "../dataset_sample/men/"
-womenPath = "../dataset_sample/Women/"
-# menPath = "../Dataset_0-5/men/"
-# womenPath = "../Dataset_0-5/Women/"
+# menPath = "../dataset_sample/men/"
+# womenPath = "../dataset_sample/Women/"
+menPath = "../Dataset_0-5/men/"
+womenPath = "../Dataset_0-5/Women/"
 img = cv.imread(menPath + '0/0_men (1).jpg')
 sift = cv.SIFT_create()
 kp, descriptor = sift.detectAndCompute(img, None)
@@ -26,11 +26,12 @@ def read_images_from_folders(base_dir):
     for class_name in os.listdir(base_dir):
         class_dir = os.path.join(base_dir, class_name)
         if os.path.isdir(class_dir):
-            for file_name in os.listdir(class_dir):
+            i = 0
+            for file_name in sorted(os.listdir(class_dir), key=Utils.extractInteger):
                 file_path = os.path.join(class_dir, file_name)
                 (file_base_name, file_extension) = os.path.splitext(file_path)
                 if os.path.isfile(file_path) and file_extension.lower() in ['.jpg', '.jpeg', '.png']:
-                    print(f"SIFT {class_name} --- {file_base_name}")
+                    print(f"SIFT {class_name} --- {file_name}")
                     # Read image
                     img = cv.imread(file_path)
                     img = Utils.getThresholdedHand(img)
@@ -49,6 +50,9 @@ def read_images_from_folders(base_dir):
                         feature_set = np.concatenate(
                             (feature_set, descriptor), axis=0)
                         y.append(class_name)
+                i = i + 1
+                if i > 50:
+                    break
 
 
 print("Reading men images...")
