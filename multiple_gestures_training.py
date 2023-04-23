@@ -4,6 +4,8 @@ import cv2 as cv
 from sklearn import svm
 from sklearn import cluster
 import pickle
+from utils import Utils
+
 menPath = "../dataset_sample/men/"
 womenPath = "../dataset_sample/Women/"
 # menPath = "../Dataset_0-5/men/"
@@ -19,27 +21,6 @@ y = []
 y.append(0)
 
 
-def getThresholdedHand(frame):
-    # Convert image to HSV
-    hsvim = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    # Lower boundary of skin color in HSV
-    lower = np.array([0, 48, 80], dtype="uint8")
-    # Upper boundary of skin color in HSV
-    upper = np.array([20, 255, 255], dtype="uint8")
-    skinMask = cv.inRange(hsvim, lower, upper)
-
-    # Gaussian filter (blur) to remove noise
-    skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
-
-    # get thresholded image
-    # ret, thresh1 = cv.threshold(
-    # skinMask, 100, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
-    thresh1 = cv.adaptiveThreshold(
-        skinMask, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 355, 5)
- 
-    return thresh1
-
-
 def read_images_from_folders(base_dir):
     global feature_set, y
     for class_name in os.listdir(base_dir):
@@ -52,7 +33,7 @@ def read_images_from_folders(base_dir):
                     print(f"SIFT {class_name} --- {file_base_name}")
                     # Read image
                     img = cv.imread(file_path)
-                    img = getThresholdedHand(img)
+                    img = Utils.getThresholdedHand(img)
                     # img = cv.normalize(img, None, 0, 255,
                     #                    cv.NORM_MINMAX).astype('uint8')
                     # Initialize sift

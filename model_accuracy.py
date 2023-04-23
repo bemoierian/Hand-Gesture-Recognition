@@ -1,82 +1,64 @@
 import cv2 as cv
-import numpy as np
-
-import pickle
 from sklearn.metrics import accuracy_score
 import os
-
+from utils import Utils
 # Load kmeans model
-print("Loading Kmeans model...")
-filename1 = 'kmeans_model.sav'
-k_means = pickle.load(open(filename1, 'rb'))
+k_means = Utils.loadKmeansModel()
+print("Success")
 n_clusters = 1600
 # Load SVM model
-print("Success")
-print("Loading SVM model...")
-filename2 = 'gestures_model.sav'
-clf = pickle.load(open(filename2, 'rb'))
+clf = Utils.loadSVMModel()
 print("Success")
 y_true = []
 y_predict = []
 menPath = "../Dataset_0-5/men/"
 womenPath = "../Dataset_0-5/Women/"
+outputPath = "../predicted_images/"
 
 
-def getThresholdedHand(frame):
-    # Convert image to HSV
-    hsvim = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    # Lower boundary of skin color in HSV
-    lower = np.array([0, 48, 80], dtype="uint8")
-    # Upper boundary of skin color in HSV
-    upper = np.array([20, 255, 255], dtype="uint8")
-    skinMask = cv.inRange(hsvim, lower, upper)
+def processImages(imgsPath, classeStartIndex, classeEndIndex, imgStartIndex, imgEndIndex):
+    global menPath, womenPath, y_true, y_predict, k_means, clf, outputPath, n_clusters
+    for g in range(classeStartIndex, classeEndIndex):
+        if imgsPath == menPath:
+            print(f"Men {g}")
+        else:
+            print(f"Women {g}")
+        class_dir = os.path.join(imgsPath, f"{g}")
+        for i in range(imgStartIndex, imgEndIndex):
+            # Read image
+            imgPath = os.path.join(
+                class_dir, f'{g}{"_men" if imgsPath == menPath else "_woman"} ({i}).JPG')
+            img = cv.imread(imgPath)
+            img = Utils.getThresholdedHand(img)
 
-    # Gaussian filter (blur) to remove noise
-    skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
+            # Feature extraction
+            sift = cv.SIFT_create()
+            kp, descriptor = sift.detectAndCompute(img, None)
+            # Produce "bag of words" vector
+            descriptor = k_means.predict(descriptor)
+            print(f"SIFT {g}/{i}")
+            vq = [0] * n_clusters
+            for feature in descriptor:
+                vq[feature] = vq[feature] + 1  # load the model from disk
 
-    # get thresholded image
-    # ret, thresh1 = cv.threshold(
-    # skinMask, 100, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
-    thresh1 = cv.adaptiveThreshold(
-        skinMask, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 355, 5)
+            # append true class
+            y_true.append(g)
 
-    return thresh1
+            # Predict the result
+            predictedClass = int(clf.predict([vq])[0])
+            y_predict.append(predictedClass)
+
+            # Draw predicted class on image and save it
+            cv.rectangle(img, (5, 5), (500, 100), (175, 0, 175), cv.FILLED)
+            cv.putText(img, f'{predictedClass}', (40, 80),
+                            cv.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 6)
+            outPath = os.path.join(outputPath, f'{g}_men ({i}).JPG')
+            cv.imwrite(outPath, img)
 
 
-for g in range(0, 6):
-    for i in range(1, 101):
-        # Read image
-        img = cv.imread(menPath + f'{g}_men ({i}).JPG')
-        img = getThresholdedHand(img)
-
-        # Feature extraction
-        sift = cv.SIFT_create()
-        kp, descriptor = sift.detectAndCompute(img, None)
-        # Produce "bag of words" vector
-        descriptor = k_means.predict(descriptor)
-        print(f"SIFT {g}/{i}")
-        vq = [0] * n_clusters
-        for feature in descriptor:
-            vq[feature] = vq[feature] + 1  # load the model from disk
-        y_true.append(g)
-        # Predict the result
-        y_predict.append(clf.predict([vq]))
-for g in range(0, 6):
-    for i in range(1, 101):
-        # Read image
-        img = cv.imread(womenPath + f'{g}_woman ({i}).JPG')
-        img = getThresholdedHand(img)
-        # Feature extraction
-        sift = cv.SIFT_create()
-        kp, descriptor = sift.detectAndCompute(img, None)
-        # Produce "bag of words" vector
-        descriptor = k_means.predict(descriptor)
-        print(f"SIFT {g}/{i}")
-        vq = [0] * n_clusters
-        for feature in descriptor:
-            vq[feature] = vq[feature] + 1  # load the model from disk
-        y_true.append(g)
-        # Predict the result
-        y_predict.append(clf.predict([vq]))
+processImages(menPath, 0, 6, 1, 3)
+processImages(womenPath, 0, 6, 1, 3)
+print(f"y_true: {y_true}")
+print(f"y_predict: {y_predict}")
 accuracy = accuracy_score(y_true, y_predict)
 print(f"Accuracy: {accuracy}")
