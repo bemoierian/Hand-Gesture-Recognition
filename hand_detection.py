@@ -126,8 +126,8 @@ while True:
     # ----------------------------------------------------
     # Region of interest to be used for hand thresholding
     roiForHandThresholding = img[top:bottom, right:left]
-    # thres = getThresholdedHand(img, roiForHandThresholding)
-    thres = roiForHandThresholding
+    thres = getThresholdedHand(img, roiForHandThresholding)
+    # thres = roiForHandThresholding
     # ----------------------------------------------------
     # ----------------GESTURE PREDICTION------------------
     # ----------------------------------------------------

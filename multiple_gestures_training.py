@@ -17,26 +17,27 @@ descriptors.append(descriptor)
 bagOfWords = []
 y = []
 y.append(0)
-# for g in range(0, 11):
-#     if g == 0:
-#         c = 2
-#     else:
-#         c = 1
-#     for i in range(c, 1251):
-#         # Read image
-#         img = cv.imread(path + f'{g}/{g}_men ({i}).jpg')
-#         # Initialize sift
-#         sift = cv.SIFT_create()
-#         # Keypoints, descriptors
-#         kp, descriptor = sift.detectAndCompute(img, None)
-#         # Each keypoint has a descriptor with length 128
-#         print(f"SIFT {g}/{i}")
-#         if descriptor is None:
-#             continue
-#         else:
-#             descriptors.append(np.array(descriptor))
-#             feature_set = np.concatenate((feature_set, descriptor), axis=0)
-#             y.append(g)
+
+
+def getThresholdedHand(frame):
+    # Convert image to HSV
+    hsvim = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    # Lower boundary of skin color in HSV
+    lower = np.array([0, 48, 80], dtype="uint8")
+    # Upper boundary of skin color in HSV
+    upper = np.array([20, 255, 255], dtype="uint8")
+    skinMask = cv.inRange(hsvim, lower, upper)
+
+    # Gaussian filter (blur) to remove noise
+    skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
+
+    # get thresholded image
+    # ret, thresh1 = cv.threshold(
+    # skinMask, 100, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
+    thresh1 = cv.adaptiveThreshold(
+        skinMask, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 355, 5)
+ 
+    return thresh1
 
 
 def read_images_from_folders(base_dir):
@@ -51,10 +52,12 @@ def read_images_from_folders(base_dir):
                     print(f"SIFT {class_name} --- {file_base_name}")
                     # Read image
                     img = cv.imread(file_path)
+                    img = getThresholdedHand(img)
                     # img = cv.normalize(img, None, 0, 255,
                     #                    cv.NORM_MINMAX).astype('uint8')
                     # Initialize sift
                     sift = cv.SIFT_create()
+
                     # Keypoints, descriptors
                     kp, descriptor = sift.detectAndCompute(img, None)
                     # Each keypoint has a descriptor with length 128
