@@ -22,7 +22,7 @@ y.append(0)
 
 
 def read_images_from_folders(base_dir):
-    global feature_set, y
+    global feature_set, y, sift
     for class_name in os.listdir(base_dir):
         class_dir = os.path.join(base_dir, class_name)
         if os.path.isdir(class_dir):
@@ -33,12 +33,14 @@ def read_images_from_folders(base_dir):
                 if os.path.isfile(file_path) and file_extension.lower() in ['.jpg', '.jpeg', '.png']:
                     print(f"SIFT {class_name} --- {file_name}")
                     # Read image
+                    # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     img = cv.imread(file_path)
+                    # img = Utils.getMaskedHand(img)
                     img = Utils.getThresholdedHand(img)
                     # img = cv.normalize(img, None, 0, 255,
                     #                    cv.NORM_MINMAX).astype('uint8')
                     # Initialize sift
-                    sift = cv.SIFT_create()
+                    # sift = cv.SIFT_create()
 
                     # Keypoints, descriptors
                     kp, descriptor = sift.detectAndCompute(img, None)
@@ -51,7 +53,7 @@ def read_images_from_folders(base_dir):
                             (feature_set, descriptor), axis=0)
                         y.append(class_name)
                 i = i + 1
-                if i > 50:
+                if i > 70:
                     break
 
 
@@ -63,9 +65,9 @@ read_images_from_folders(womenPath)
 print(f"Success")
 # Kmeans clustering on all training set
 print(f"Running kmeans...")
-n_clusters = 1600
+n_clusters = 3000
 np.random.seed(0)
-k_means = cluster.KMeans(n_clusters=n_clusters, n_init=4)
+k_means = cluster.KMeans(n_clusters=n_clusters, init='k-means++', n_init=1)
 k_means.fit(feature_set)
 # Produce "bag of words" histogram for each image
 print(f"Success")
