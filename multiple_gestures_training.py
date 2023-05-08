@@ -35,8 +35,15 @@ def read_images_from_folders(base_dir):
                     # Read image
                     # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     img = cv.imread(file_path)
+
+                    img = Utils.skin_color_thresholding(img)
+                    img = cv.normalize(img, None, 0, 255,
+                                       cv.NORM_MINMAX).astype('uint8')
+                    kernel = np.ones((30,30),np.uint8)
+                    # img = cv.erode(img,kernel,iterations = 1)
+                    img = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
                     # img = Utils.getMaskedHand(img)
-                    img = Utils.getThresholdedHand(img)
+                    # img = Utils.getThresholdedHand(img)
                     # img = cv.normalize(img, None, 0, 255,
                     #                    cv.NORM_MINMAX).astype('uint8')
                     # Initialize sift
@@ -65,7 +72,7 @@ read_images_from_folders(womenPath)
 print(f"Success")
 # Kmeans clustering on all training set
 print(f"Running kmeans...")
-n_clusters = 3000
+n_clusters = 1600
 np.random.seed(0)
 k_means = cluster.KMeans(n_clusters=n_clusters, init='k-means++', n_init=1)
 k_means.fit(feature_set)
