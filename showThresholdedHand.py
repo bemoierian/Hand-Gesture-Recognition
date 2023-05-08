@@ -5,18 +5,19 @@ import numpy as np
 
 menPath = "../Dataset_0-5/men/"
 womenPath = "../Dataset_0-5/Women/"
+testImgPath = "../"
 outputPath = "../thresholded_images/"
 sift = cv.SIFT_create()
 
-label = 2
-for i in range(8, 15):
+label = 5
+for i in range(2, 15):
     class_dir = os.path.join(menPath, f"{label}")
     imgPath = os.path.join(class_dir, f'{label}_men ({i}).JPG')
     img = cv.imread(imgPath)
-    # img = cv.normalize(img, None, 0, 255,
-    #                                    cv.NORM_MINMAX).astype('uint8')
-    img = Utils.getThresholdedHand(img)
-    # cv.GaussianBlur(img, (41, 41), 0)
+    img = Utils.skin_color_thresholding(img)
+    img = cv.normalize(img, None, 0, 255,
+                                       cv.NORM_MINMAX).astype('uint8')
+    # img = Utils.getThresholdedHand(img)
     # img = Utils.getMaskedHand(img) 
     # kp, descriptor = sift.detectAndCompute(img, None)
     # print(f"descriptor shape {descriptor.shape}")
@@ -25,9 +26,12 @@ for i in range(8, 15):
     # t_upper = 255  # Upper threshold
     # edge = cv.Canny(img, t_lower, t_upper)
 
-    kernel = np.ones((20,20),np.uint8)
-    img = cv.dilate(img,kernel,iterations = 5)
+    kernel = np.ones((30,30),np.uint8)
+    # img = cv.erode(img,kernel,iterations = 1)
     img = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
+
+    img = cv.GaussianBlur(img, (7, 7), 0)
+
     kp, descriptor = sift.detectAndCompute(img, None)
     # print(f"descriptor shape {descriptor.shape}")
     img2 = cv.drawKeypoints(img,kp,None,(255,0,0),4)
@@ -37,3 +41,8 @@ for i in range(8, 15):
     cv.imwrite(outPath, img2)
     # if cv.waitKey(1) & 0xff == 27:
     #     break
+# imgPath = os.path.join(testImgPath, f'Screenshot 2023-05-08 035552.png')
+# img = cv.imread(imgPath)
+# img = Utils.getGuassianThresholdedHand(img)
+# outPath = os.path.join(outputPath, f'test.png')
+# cv.imwrite(outPath, img)
