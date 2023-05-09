@@ -5,7 +5,8 @@ from sklearn import svm
 from sklearn import cluster
 import pickle
 from utils import Utils
-
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.decomposition import PCA
 # menPath = "../dataset_sample/men/"
 # womenPath = "../dataset_sample/Women/"
 menPath = "../Dataset_0-5/men/"
@@ -64,40 +65,79 @@ def read_images_from_folders(base_dir):
                     break
 
 
-print("Reading men images...")
-read_images_from_folders(menPath)
-print(f"Success")
-print("Reading women images...")
-read_images_from_folders(womenPath)
-print(f"Success")
-# Kmeans clustering on all training set
+# print("Reading men images...")
+# read_images_from_folders(menPath)
+# print(f"Success")
+# print("Reading women images...")
+# read_images_from_folders(womenPath)
+# print(f"Success")
+
+# -------------------Save feature set and descriptors-------------------
+# print("Saving feature set and descriptors...")
+# np.save('feature_set.npy', feature_set)
+# # descriptors = np.array(descriptors)
+# np.save('descriptors.npy', descriptors)
+# print(f"Success")
+
+# pca = PCA(n_components=1600)
+# pca.fit(feature_set)
+# -------------------Load feature set and descriptors-------------------
+# print("Loading feature set and descriptors...")
+# feature_set = np.load('feature_set.npy', allow_pickle = True)
+# descriptors = np.load('descriptors.npy', allow_pickle = True)
+
+# -----------------------Train Kmeans------------------
 print(f"Running kmeans...")
-n_clusters = 1600
+n_clusters = 10000
 np.random.seed(0)
-k_means = cluster.KMeans(n_clusters=n_clusters, init='k-means++', n_init=1)
-k_means.fit(feature_set)
-# Produce "bag of words" histogram for each image
-print(f"Success")
-print(f"Generating bag of words...")
-for descriptor in descriptors:
-    vq = [0] * n_clusters
-    descriptor = k_means.predict(descriptor)
-    for feature in descriptor:
-        vq[feature] = vq[feature] + 1
-    bagOfWords.append(vq)
+# k_means = cluster.KMeans(n_clusters=n_clusters, init='k-means++', n_init=1)
+# k_means.fit(feature_set)
 
+# -----------------save the kmeans model to disk------------------
+# filename1 = 'kmeans_model.sav'
+# pickle.dump(k_means, open(filename1, 'wb'))
+
+# -----------------------Load saved Kmeans------------------
+k_means = Utils.loadKmeansModel()
 print(f"Success")
-print(f"Training SVM model...")
-# Train the SVM multiclass classification model
-clf = svm.SVC(decision_function_shape='ovo')
+# -----------Produce "bag of words" histogram for each image----------
+# print(f"Generating bag of words...")
+# for descriptor in descriptors:
+#     descriptor = k_means.predict(descriptor)
+#     vq = [0] * n_clusters
+#     for feature in descriptor:
+#         vq[feature] = vq[feature] + 1
+#     bagOfWords.append(vq)
+# print(f"Success")
+
+# -------------------Save bag of words and y-------------------
+# print("Saving bag of words and y...")
+# bagOfWords = np.array(bagOfWords)
+# np.save('bag_of_words.npy', bagOfWords)
+# y = np.array(y)
+# np.save('y.npy', y)
+# print(f"Success")
+
+# -------------------Load bag of words and y-------------------
+print("Loading bag of words and y...")
+bagOfWords = np.load('bag_of_words.npy', allow_pickle = True)
+y = np.load('y.npy', allow_pickle = True)
+
+# ----------------------Train SVM---------------------
+# print(f"Training SVM model...")
+# clf = svm.SVC(decision_function_shape='ovo')
+# clf.fit(bagOfWords, y)
+
+# ----------------------Train AdaBoost---------------------
+print(f"Training AdaBoost model...")
+clf = AdaBoostClassifier(n_estimators=50000, random_state=0)
 clf.fit(bagOfWords, y)
-print(f"Success")
-print(f"Saving models")
 
-# save the kmeans model to disk
-filename1 = 'kmeans_model.sav'
-pickle.dump(k_means, open(filename1, 'wb'))
-# save the SVM model to disk
+print(f"Success")
+
+
+print(f"Saving models")
+# save the model to disk
 filename2 = 'gestures_model.sav'
 pickle.dump(clf, open(filename2, 'wb'))
 print(f"Success")
