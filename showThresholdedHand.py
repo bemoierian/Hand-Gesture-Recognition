@@ -3,25 +3,28 @@ import cv2 as cv
 from utils import Utils
 import numpy as np
 
+# menPath = "../resized/men/"
+# womenPath = "../resized/Women/"
 menPath = "../Dataset_0-5/men/"
 womenPath = "../Dataset_0-5/Women/"
 testImgPath = "../"
 outputPath = "../thresholded_images/"
-sift = cv.SIFT_create()
+# sift = cv.SIFT_create()
 # Set desired image size
-img_width = 64
-label = 3
-for i in range(2, 15):
+img_width = 256
+label = 2
+for i in range(21, 31):
     class_dir = os.path.join(menPath, f"{label}")
     imgPath = os.path.join(class_dir, f'{label}_men ({i}).JPG')
     img = cv.imread(imgPath)
+    img = Utils.getMaskedHand(img)
     h, w = img.shape[:2]
     new_height = int(h * img_width / w)
     img_size = (img_width, new_height)
     resized = cv.resize(img, img_size)    # Convert to grayscale
-    gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+    # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
     # img = Utils.skin_color_thresholding(img)
-    img = cv.normalize(gray, None, 0, 255,
+    img = cv.normalize(resized, None, 0, 255,
                                        cv.NORM_MINMAX).astype('uint8')
     # img = Utils.getThresholdedHand(img)
     # img = Utils.getMaskedHand(img) 

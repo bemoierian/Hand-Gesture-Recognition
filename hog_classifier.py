@@ -2,12 +2,13 @@ import os
 import numpy as np
 import cv2 as cv
 from sklearn import svm
-from sklearn import cluster
+# from sklearn import cluster
 import pickle
 from utils import Utils
 from sklearn.ensemble import AdaBoostClassifier
-from sklearn.decomposition import PCA
-from skimage.feature import hog
+# from sklearn.decomposition import PCA
+# from skimage.feature import hog
+
 # menPath = "../dataset_sample/men/"
 # womenPath = "../dataset_sample/Women/"
 menPath = "../Dataset_0-5/men/"
@@ -32,14 +33,15 @@ def read_images_from_folders(base_dir):
                     # Read image
                     # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     img = cv.imread(file_path)
+                    img = Utils.getMaskedHand(img)
                     # Calculate new size
                     h, w = img.shape[:2]
                     new_height = int(h * img_width / w)
                     img_size = (img_width, new_height)
                     resized = cv.resize(img, img_size)
-                    gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-                    # NormalizedImg = cv.normalize(gray, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
-                    trainingImgs.append(gray)
+                    # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+                    NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+                    trainingImgs.append(NormalizedImg)
                     y.append(class_name)
 
                     # img = cv.normalize(img, None, 0, 255,
@@ -54,7 +56,7 @@ def read_images_from_folders(base_dir):
                     #     hogFeatures.append(np.array(fd))
                     #     y.append(class_name)
                 i = i + 1
-                if i > 70:
+                if i > 105:
                     break
 
 
@@ -86,14 +88,14 @@ for img in trainingImgs:
     hogFeatures.append(features)
 
 # ----------------------Train SVM---------------------
-# print(f"Training SVM model...")
-# clf = svm.SVC(decision_function_shape='ovo')
-# clf.fit(hogFeatures, y)
+print(f"Training SVM model...")
+clf = svm.SVC(decision_function_shape='ovo')
+clf.fit(hogFeatures, y)
 
 # ----------------------Train AdaBoost---------------------
-print(f"Training AdaBoost model...")
-clf = AdaBoostClassifier(n_estimators=1000, random_state=0)
-clf.fit(hogFeatures, y)
+# print(f"Training AdaBoost model...")
+# clf = AdaBoostClassifier(n_estimators=1000, random_state=0)
+# clf.fit(hogFeatures, y)
 
 print(f"Success")
 

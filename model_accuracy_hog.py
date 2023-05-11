@@ -3,7 +3,7 @@ from sklearn.metrics import accuracy_score
 import os
 import numpy as np
 from utils import Utils
-from skimage.feature import hog
+# from skimage.feature import hog
 
 # Load SVM model
 clf = Utils.loadSVMModel()
@@ -41,49 +41,44 @@ def processImages(imgsPath, classeStartIndex, classeEndIndex, imgStartIndex, img
             # Read image
             imgPath = os.path.join(
                 class_dir, f'{g}{"_men" if imgsPath == menPath else "_woman"} ({i}).JPG')
-            img = cv.imread(imgPath)
-            # Calculate new size
-            h, w = img.shape[:2]
-            new_height = int(h * img_width / w)
-            img_size = (img_width, new_height)
-            resized = cv.resize(img, img_size)
-            gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-            NormalizedImg = cv.normalize(gray, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
-            # testImgs.append(NormalizedImg)
-            # fd, hog_image = hog(img, orientations=8, pixels_per_cell=(16, 16),
-            #             cells_per_block=(1, 1), visualize=True, channel_axis=-1)
-            features = hog.compute(NormalizedImg)
-            # features, hog_image = hog(NormalizedImg, orientations=8, pixels_per_cell=(16, 16),
-            #             cells_per_block=(1, 1), visualize=True)
+            if os.path.isfile(imgPath):
+                img = cv.imread(imgPath)
+                img = Utils.getMaskedHand(img)
+                # Calculate new size
+                h, w = img.shape[:2]
+                new_height = int(h * img_width / w)
+                img_size = (img_width, new_height)
+                resized = cv.resize(img, img_size)
+                # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+                NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
 
-            # img = cv.imread(imgPath, cv.IMREAD_GRAYSCALE)
-            # img = Utils.getMaskedHand(img)
+                # testImgs.append(NormalizedImg)
+                # fd, hog_image = hog(img, orientations=8, pixels_per_cell=(16, 16),
+                #             cells_per_block=(1, 1), visualize=True, channel_axis=-1)
+                features = hog.compute(NormalizedImg)
+                # features, hog_image = hog(NormalizedImg, orientations=8, pixels_per_cell=(16, 16),
+                #             cells_per_block=(1, 1), visualize=True)
 
-            # img = Utils.getThresholdedHand(img)
+                # append true class
+                y_true.append(g)
 
+                # Predict the result
+                predictedClass = int(clf.predict([features])[0])
+                y_predict.append(predictedClass)
+                print(f"{i} Predicted: {predictedClass}, True: {g}")
 
-            # img = cv.normalize(img, None, 0, 255,
-            #                     cv.NORM_MINMAX).astype('uint8')
-          
-            # append true class
-            y_true.append(g)
+                # Draw predicted class on image and save it
+                # cv.rectangle(NormalizedImg, (5, 5), (500, 100), (175, 0, 175), cv.FILLED)
+                cv.putText(NormalizedImg, f'{predictedClass}', (40, 80),
+                                cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 6)
+                outPath = os.path.join(
+                    outputPath, f'{g}{"_men" if imgsPath == menPath else "_woman"} ({i}).JPG')
+                cv.imwrite(outPath, NormalizedImg)
+            else:
+                break
 
-            # Predict the result
-            predictedClass = int(clf.predict([features])[0])
-            y_predict.append(predictedClass)
-            print(f"Predicted class: {predictedClass}, True class: {g}")
-
-            # # Draw predicted class on image and save it
-            # cv.rectangle(img, (5, 5), (500, 100), (175, 0, 175), cv.FILLED)
-            # cv.putText(img, f'{predictedClass}', (40, 80),
-            #                 cv.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 6)
-            # outPath = os.path.join(
-            #     outputPath, f'{g}{"_men" if imgsPath == menPath else "_woman"} ({i}).JPG')
-            # cv.imwrite(outPath, img)
-
-
-processImages(menPath, 0, 6, 71, 91)
-processImages(womenPath, 0, 6, 71, 91)
+processImages(menPath, 0, 6, 106, 140)
+processImages(womenPath, 0, 6, 106, 140)
 # for img in testImgs:
 #     # print(f"HOG {trainingImgs.index(img)}")
 #     features = hog.compute(img)

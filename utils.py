@@ -89,11 +89,19 @@ class Utils:
 
         # Gaussian filter (blur) to remove noise
         skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
-        greyImg = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        masked = cv.bitwise_and(greyImg, greyImg, mask=skinMask)
-        maskedBlurred = cv.GaussianBlur(masked, (41, 41), 0)
 
-        return maskedBlurred
+
+        # threshImg = Utils.skin_color_thresholding(frame)
+        # threshImg = cv.normalize(threshImg, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+
+
+        greyImg = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        # greyImg = cv.normalize(greyImg, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+        masked = cv.bitwise_and(greyImg, greyImg, mask=skinMask)
+        # maskedBlurred = cv.GaussianBlur(masked, (41, 41), 0)
+
+
+        return masked
 
     @staticmethod
     def loadKmeansModel():
