@@ -33,11 +33,11 @@ def read_images_from_folders(base_dir):
                     # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     img = cv.imread(file_path)
                     # Calculate new size
-                    # h, w = img.shape[:2]
-                    # new_height = int(h * img_width / w)
-                    # img_size = (img_width, new_height)
-                    # resized = cv.resize(img, img_size)
-                    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                    h, w = img.shape[:2]
+                    new_height = int(h * img_width / w)
+                    img_size = (img_width, new_height)
+                    resized = cv.resize(img, img_size)
+                    gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
                     # NormalizedImg = cv.normalize(gray, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
                     trainingImgs.append(gray)
                     y.append(class_name)
