@@ -14,16 +14,16 @@ from sklearn.decomposition import PCA
 
 # menPath = "../dataset_sample/men/"
 # womenPath = "../dataset_sample/Women/"
-# menPath = "../Dataset_0-5/men/"
-# womenPath = "../Dataset_0-5/Women/"
-menPath = "../resized/men/"
-womenPath = "../resized/Women/"
+menPath = "../Dataset_0-5/men/"
+womenPath = "../Dataset_0-5/Women/"
+# menPath = "../resized/men/"
+# womenPath = "../resized/Women/"
 inputImgs = []
 hogFeatures = []
 y = []
 # hog = cv.HOGDescriptor()
 # Set desired image width
-img_width = 256
+img_width = 120
 def read_images_from_folders(base_dir):
     global feature_set, y, img_width
     for class_name in os.listdir(base_dir):
@@ -34,19 +34,21 @@ def read_images_from_folders(base_dir):
                 file_path = os.path.join(class_dir, file_name)
                 (file_base_name, file_extension) = os.path.splitext(file_path)
                 if os.path.isfile(file_path) and file_extension.lower() in ['.jpg', '.jpeg', '.png']:
-                    print(f"Reading {class_name} --- {file_name}")
+                    print(f"Reading {file_name}")
                     # ------------------Read image---------------
-                    img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
+                    img = cv.imread(file_path)
                     # ------------------Preprocessing---------------
-                    # img = Utils.getMaskedHand(img)
-                    # # Calculate new size
-                    # h, w = img.shape[:2]
-                    # new_height = int(h * img_width / w)
-                    # img_size = (img_width, new_height)
-                    # resized = cv.resize(img, img_size)
-                    # # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-                    # NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
-                    inputImgs.append(img)
+                    img = Utils.adjust_image(img)
+                    img = Utils.getMaskedHand(img)
+                    # Calculate new size
+                    h, w = img.shape[:2]
+                    new_height = int(h * img_width / w)
+                    img_size = (img_width, new_height)
+                    resized = cv.resize(img, img_size)
+                    # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+                    NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+                    # ------------------Append to list---------------
+                    inputImgs.append(NormalizedImg)
                     y.append(int(class_name))
                 # i = i + 1
                 # if i > 5:
@@ -60,8 +62,8 @@ print("Reading women images...")
 read_images_from_folders(womenPath)
 print(f"Success")
 # ----------------SPLIT TRAINING AND TEST SET----------------
-# best random_state++ till now: 74
-trainingImgs, testImgs, y_train, y_test = train_test_split(inputImgs, y, test_size=0.2, random_state=74)
+# best random_state++ till now: 74, 693
+trainingImgs, testImgs, y_train, y_test = train_test_split(inputImgs, y, test_size=0.2, random_state=693)
 print(f"Training images: {len(trainingImgs)}")
 print(f"Test images: {len(testImgs)}")
 # -------------------------HOG----------------------------
@@ -73,8 +75,8 @@ cell_size = (8, 8)
 nbins = 9
 
 # Create HOG descriptor
-# hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
-hog = cv.HOGDescriptor()
+hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
+# hog = cv.HOGDescriptor()
 for img in trainingImgs:
     # hog from opencv
     features = hog.compute(img)
@@ -82,7 +84,7 @@ for img in trainingImgs:
 
 # ----------------------PCA---------------------
 print("PCA...")
-pca = PCA(n_components=0.85)
+pca = PCA(n_components=0.83)
 pcaModel = pca.fit(hogFeatures)
 print(f"Success")
 print(f"Saving pca model")

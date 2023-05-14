@@ -13,10 +13,12 @@ outputPath = "../thresholded_images/"
 # Set desired image size
 img_width = 256
 label = 2
-for i in range(21, 31):
+for i in range(31, 50):
     class_dir = os.path.join(menPath, f"{label}")
     imgPath = os.path.join(class_dir, f'{label}_men ({i}).JPG')
     img = cv.imread(imgPath)
+    img = Utils.gamma_correction(img, 0.5)
+    img = Utils.adjust_image(img)
     img = Utils.getMaskedHand(img)
     h, w = img.shape[:2]
     new_height = int(h * img_width / w)
@@ -46,7 +48,7 @@ for i in range(21, 31):
     # img2 = cv.drawKeypoints(img,kp,None,(255,0,0),4)
 
 
-    outPath = os.path.join(outputPath, f'{label}_men ({i}).JPG')
+    outPath = os.path.join(outputPath, f'{label}_men ({i})1.JPG')
     cv.imwrite(outPath, img)
     # if cv.waitKey(1) & 0xff == 27:
     #     break

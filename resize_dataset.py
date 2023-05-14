@@ -14,7 +14,7 @@ menPath = "../Dataset_0-5/men/"
 womenPath = "../Dataset_0-5/Women/"
 menPathOutput = "../resized/men/"
 womenPathOutput = "../resized/Women/"
-img_width = 256
+img_width = 120
 def read_images_from_folders(base_dir, output_dir):
     global feature_set, y, img_width
     for class_name in os.listdir(base_dir):
@@ -31,6 +31,8 @@ def read_images_from_folders(base_dir, output_dir):
                     # Read image
                     # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     img = cv.imread(file_path)
+                    img = Utils.gamma_correction(img, 0.7)
+                    img = Utils.adjust_image(img)
                     img = Utils.getMaskedHand(img)
                     # Calculate new size
                     h, w = img.shape[:2]

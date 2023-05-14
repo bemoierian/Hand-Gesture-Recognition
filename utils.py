@@ -79,31 +79,28 @@ class Utils:
 
     @staticmethod
     def getMaskedHand(frame):
-        # ------------Thresholding method 1-----------------
-        # Convert image to HSV
-        hsvim = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-        # Lower boundary of skin color in HSV
-        # lower = np.array([0, 20, 70], dtype="uint8")
-        lower = np.array([0, 48, 80], dtype="uint8")
-        # Upper boundary of skin color in HSV
-        upper = np.array([20, 255, 255], dtype="uint8")
-        skinMask = cv.inRange(hsvim, lower, upper)
-
-        # Gaussian filter (blur) to remove noise
-        skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
-        # print(f"skinMask shape {skinMask.shape}")
-        # print(f"skin mask: {skinMask}")
+        # # ------------Thresholding method 1-----------------
+        # # Convert image to HSV
+        # hsvim = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+        # # Lower boundary of skin color in HSV
+        # # lower = np.array([0, 20, 70], dtype="uint8")
+        # lower = np.array([0, 48, 80], dtype="uint8")
+        # # Upper boundary of skin color in HSV
+        # upper = np.array([20, 255, 255], dtype="uint8")
+        # skinMask = cv.inRange(hsvim, lower, upper)
+        # # Gaussian filter (blur) to remove noise
+        # skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
 
         # ------------Thresholding method 2-----------------
-        # threshImg = Utils.skin_color_thresholding(frame)
-        # threshImg = cv.normalize(threshImg, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
+        threshImg = Utils.skin_color_thresholding(frame)
+        threshImg = cv.normalize(threshImg, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
         # print(f"threshImg shape {threshImg.shape}")
         # print(f"threshImg: {threshImg}")
 
 
         greyImg = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         # print(f"greyImg shape {greyImg.shape}")
-        masked = cv.bitwise_and(greyImg, greyImg, mask=skinMask)
+        masked = cv.bitwise_and(greyImg, greyImg, mask=threshImg)
         # maskedBlurred = cv.GaussianBlur(masked, (41, 41), 0)
 
 
@@ -153,3 +150,13 @@ class Utils:
         # Convert the LAB image back to BGR color space
         final = cv.cvtColor(limg, cv.COLOR_LAB2BGR)
         return final
+    @staticmethod
+    def gamma_correction(image, gamma=1.0):
+        # Build a lookup table mapping the pixel values [0, 255] to their adjusted gamma values
+        invGamma = 1.0 / gamma
+        table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
+
+        # Apply gamma correction using the lookup table
+        corrected_image = cv.LUT(image, table)
+
+        return corrected_image
