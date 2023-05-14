@@ -6,14 +6,19 @@ from sklearn import svm
 import pickle
 from utils import Utils
 from sklearn.ensemble import AdaBoostClassifier
-# from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+from sklearn.decomposition import PCA
 # from skimage.feature import hog
 
 # menPath = "../dataset_sample/men/"
 # womenPath = "../dataset_sample/Women/"
-menPath = "../Dataset_0-5/men/"
-womenPath = "../Dataset_0-5/Women/"
-trainingImgs = []
+# menPath = "../Dataset_0-5/men/"
+# womenPath = "../Dataset_0-5/Women/"
+menPath = "../resized/men/"
+womenPath = "../resized/Women/"
+inputImgs = []
 hogFeatures = []
 y = []
 # hog = cv.HOGDescriptor()
@@ -30,44 +35,36 @@ def read_images_from_folders(base_dir):
                 (file_base_name, file_extension) = os.path.splitext(file_path)
                 if os.path.isfile(file_path) and file_extension.lower() in ['.jpg', '.jpeg', '.png']:
                     print(f"Reading {class_name} --- {file_name}")
-                    # Read image
-                    # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
-                    img = cv.imread(file_path)
-                    img = Utils.getMaskedHand(img)
-                    # Calculate new size
-                    h, w = img.shape[:2]
-                    new_height = int(h * img_width / w)
-                    img_size = (img_width, new_height)
-                    resized = cv.resize(img, img_size)
-                    # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-                    NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
-                    trainingImgs.append(NormalizedImg)
-                    y.append(class_name)
+                    # ------------------Read image---------------
+                    img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
+                    # ------------------Preprocessing---------------
+                    # img = Utils.getMaskedHand(img)
+                    # # Calculate new size
+                    # h, w = img.shape[:2]
+                    # new_height = int(h * img_width / w)
+                    # img_size = (img_width, new_height)
+                    # resized = cv.resize(img, img_size)
+                    # # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+                    # NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+                    inputImgs.append(img)
+                    y.append(int(class_name))
+                # i = i + 1
+                # if i > 5:
+                #     break
 
-                    # img = cv.normalize(img, None, 0, 255,
-                    #                    cv.NORM_MINMAX).astype('uint8')
-                   
-                    # fd, hog_image = hog(img, orientations=8, pixels_per_cell=(16, 16),
-                    #     cells_per_block=(1, 1), visualize=True, channel_axis=-1)
-                    # fd = hog.compute(img)
-                    # if fd is None:
-                    #     continue
-                    # else:
-                    #     hogFeatures.append(np.array(fd))
-                    #     y.append(class_name)
-                i = i + 1
-                if i > 105:
-                    break
-
-
+# -----------------------READ IMAGES----------------
 print("Reading men images...")
 read_images_from_folders(menPath)
 print(f"Success")
 print("Reading women images...")
 read_images_from_folders(womenPath)
 print(f"Success")
-
-# Compute HOG features
+# ----------------SPLIT TRAINING AND TEST SET----------------
+# best random_state++ till now: 74
+trainingImgs, testImgs, y_train, y_test = train_test_split(inputImgs, y, test_size=0.2, random_state=74)
+print(f"Training images: {len(trainingImgs)}")
+print(f"Test images: {len(testImgs)}")
+# -------------------------HOG----------------------------
 # Set HOG parameters
 win_size = (64, 64)
 block_size = (16, 16)
@@ -79,32 +76,30 @@ nbins = 9
 # hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
 hog = cv.HOGDescriptor()
 for img in trainingImgs:
-    # print(f"HOG {trainingImgs.index(img)}")
-    # hog from skimage
-    # features, hog_image = hog(img, orientations=8, pixels_per_cell=(16, 16),
-    #                     cells_per_block=(1, 1), visualize=True)
     # hog from opencv
     features = hog.compute(img)
     hogFeatures.append(features)
-# print("PCA...")
-# pca = PCA(n_components=0.5)
-# pcaModel = pca.fit(hogFeatures)
-# print(f"Success")
-# print(f"Saving pca model")
-# # save the model to disk
-# filename1 = 'pca.sav'
-# pickle.dump(pcaModel, open(filename1, 'wb'))
-# hogFeatures = pcaModel.transform(hogFeatures)
-# print(f"Success")
+
+# ----------------------PCA---------------------
+print("PCA...")
+pca = PCA(n_components=0.85)
+pcaModel = pca.fit(hogFeatures)
+print(f"Success")
+print(f"Saving pca model")
+# save the model to disk
+filename1 = 'pca.sav'
+pickle.dump(pcaModel, open(filename1, 'wb'))
+hogFeatures = pcaModel.transform(hogFeatures)
+print(f"Success")
 # ----------------------Train SVM---------------------
 print(f"Training SVM model...")
 clf = svm.SVC(decision_function_shape='ovo')
-clf.fit(hogFeatures, y)
+clf.fit(hogFeatures, y_train)
 
 # ----------------------Train AdaBoost---------------------
 # print(f"Training AdaBoost model...")
 # clf = AdaBoostClassifier(n_estimators=1000, random_state=0)
-# clf.fit(hogFeatures, y)
+# clf.fit(hogFeatures, y_train)
 
 print(f"Success")
 
@@ -114,3 +109,32 @@ print(f"Saving models")
 filename2 = 'Hog_model.sav'
 pickle.dump(clf, open(filename2, 'wb'))
 print(f"Success")
+# Load SVM model
+# clf = Utils.loadSVMModel()
+# ----------------------Test---------------------
+print(f"Testing...")
+hogFeaturesTest = []
+y_predict = []
+outputPath = "../predicted_images/"
+
+for img in testImgs:
+    # --------------hog-----------------
+    features = hog.compute(img)
+    hogFeaturesTest.append(features)
+
+    # ------------Predict---------------
+    # predictedClass = int(clf.predict([features])[0])
+    # y_predict.append(predictedClass)
+    # print(f"Predicted: {predictedClass}, True: {y_test[i]}")
+
+    # # -----------Draw predicted class on image and save it----------
+    # cv.putText(testImgs[i], f'{predictedClass}', (40, 80),
+    #                 cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 6)
+    # outPath = os.path.join(
+    #     outputPath, f'{y_test[i]}_{predictedClass} ({i}).JPG')
+    # cv.imwrite(outPath, testImgs[i])
+hogFeaturesTest =  pcaModel.transform(hogFeaturesTest)
+y_predict = clf.predict(hogFeaturesTest)
+
+accuracy = accuracy_score(y_test, y_predict)
+print(f"Accuracy: {accuracy}")

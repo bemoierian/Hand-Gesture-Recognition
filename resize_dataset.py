@@ -31,13 +31,14 @@ def read_images_from_folders(base_dir, output_dir):
                     # Read image
                     # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     img = cv.imread(file_path)
+                    img = Utils.getMaskedHand(img)
                     # Calculate new size
                     h, w = img.shape[:2]
                     new_height = int(h * img_width / w)
                     img_size = (img_width, new_height)
                     resized = cv.resize(img, img_size)
-                    gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-                    NormalizedImg = cv.normalize(gray, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+                    # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+                    NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
                     cv.imwrite(file_path_output, NormalizedImg)
                 # i = i + 1
                 # if i > 70:
