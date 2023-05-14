@@ -3,6 +3,8 @@ from sklearn.metrics import accuracy_score
 import os
 import numpy as np
 from utils import Utils
+from sklearn.decomposition import PCA
+
 # from skimage.feature import hog
 
 # Load SVM model
@@ -28,7 +30,9 @@ nbins = 9
 hog = cv.HOGDescriptor()
 img_width = 256
 
-
+# Load PCA model
+# pcaModel = Utils.loadPCAModel()
+# print(f"Success")
 def processImages(imgsPath, classeStartIndex, classeEndIndex, imgStartIndex, imgEndIndex):
     global menPath, womenPath, y_true, y_predict, clf, outputPath, hog, testImgs
     for g in range(classeStartIndex, classeEndIndex):
@@ -56,6 +60,8 @@ def processImages(imgsPath, classeStartIndex, classeEndIndex, imgStartIndex, img
                 # fd, hog_image = hog(img, orientations=8, pixels_per_cell=(16, 16),
                 #             cells_per_block=(1, 1), visualize=True, channel_axis=-1)
                 features = hog.compute(NormalizedImg)
+                # featuresHog =  pcaModel.transform([featuresHog])
+
                 # features, hog_image = hog(NormalizedImg, orientations=8, pixels_per_cell=(16, 16),
                 #             cells_per_block=(1, 1), visualize=True)
 

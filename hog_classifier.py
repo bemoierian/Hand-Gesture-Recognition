@@ -86,7 +86,16 @@ for img in trainingImgs:
     # hog from opencv
     features = hog.compute(img)
     hogFeatures.append(features)
-
+# print("PCA...")
+# pca = PCA(n_components=0.5)
+# pcaModel = pca.fit(hogFeatures)
+# print(f"Success")
+# print(f"Saving pca model")
+# # save the model to disk
+# filename1 = 'pca.sav'
+# pickle.dump(pcaModel, open(filename1, 'wb'))
+# hogFeatures = pcaModel.transform(hogFeatures)
+# print(f"Success")
 # ----------------------Train SVM---------------------
 print(f"Training SVM model...")
 clf = svm.SVC(decision_function_shape='ovo')
