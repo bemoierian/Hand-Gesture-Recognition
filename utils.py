@@ -140,6 +140,15 @@ class Utils:
             k = 0
         return k
     @staticmethod
+    def extractInteger2(filename):
+        # print(filename)
+        k = 0
+        try:
+            k = int(filename.split('.')[0])
+        except:
+            k = 0
+        return k
+    @staticmethod
     def adjust_image(image):
         # Convert image to LAB color space
         lab = cv.cvtColor(image, cv.COLOR_BGR2LAB)
