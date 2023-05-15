@@ -122,6 +122,13 @@ class Utils:
         filename2 = 'Hog_model.sav'
         clf = pickle.load(open(filename2, 'rb'))
         return clf
+    @staticmethod
+    def loadPCAModel():
+        # Load PCA model
+        print("Loading PCA model...")
+        filename2 = 'pca.sav'
+        pca = pickle.load(open(filename2, 'rb'))
+        return pca
 
     @staticmethod
     def extractInteger(filename):
