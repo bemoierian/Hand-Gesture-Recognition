@@ -16,7 +16,6 @@ def read_images_from_folders(base_dir):
     global inputImgs, img_width
     for file_name in sorted(os.listdir(base_dir), key=Utils.extractInteger2):
         file_path = os.path.join(base_dir, file_name)
-        (file_base_name, file_extension) = os.path.splitext(file_path)
         if os.path.isfile(file_path):
             print(f"Reading {file_name}")
             # ------------------Read image---------------
@@ -37,7 +36,7 @@ print("Reading input images...")
 read_images_from_folders(inputPath)
 print(f"Success")
 # -------------------------HOG----------------------------
-print("Computing HOG features...")
+print("Preprocessing - HOG - PCA - Prediction...")
 # Set HOG parameters
 win_size = (64, 64)
 block_size = (16, 16)

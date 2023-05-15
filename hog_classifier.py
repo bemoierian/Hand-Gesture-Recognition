@@ -25,7 +25,7 @@ y = []
 # Set desired image width
 img_width = 120
 def read_images_from_folders(base_dir):
-    global feature_set, y, img_width
+    global inputImgs, y, img_width
     for class_name in os.listdir(base_dir):
         class_dir = os.path.join(base_dir, class_name)
         if os.path.isdir(class_dir):
@@ -110,7 +110,7 @@ print(f"Success")
 
 print(f"Saving models")
 # save the model to disk
-filename2 = 'Hog_model.sav'
+filename2 = 'SVM_model.sav'
 pickle.dump(clf, open(filename2, 'wb'))
 print(f"Success")
 # Load SVM model

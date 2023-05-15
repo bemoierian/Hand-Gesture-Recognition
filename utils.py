@@ -119,7 +119,7 @@ class Utils:
         # Load SVM model
         print("Loading SVM model...")
         # filename2 = 'gestures_model.sav'
-        filename2 = 'Hog_model.sav'
+        filename2 = 'SVM_model.sav'
         clf = pickle.load(open(filename2, 'rb'))
         return clf
     @staticmethod
