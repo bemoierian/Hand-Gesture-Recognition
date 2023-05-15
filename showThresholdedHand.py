@@ -12,8 +12,8 @@ outputPath = "../thresholded_images/"
 # sift = cv.SIFT_create()
 # Set desired image size
 img_width = 256
-label = 2
-for i in range(31, 50):
+label = 4
+for i in range(50, 60):
     class_dir = os.path.join(menPath, f"{label}")
     imgPath = os.path.join(class_dir, f'{label}_men ({i}).JPG')
     img = cv.imread(imgPath)
