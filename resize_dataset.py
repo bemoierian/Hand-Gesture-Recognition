@@ -31,7 +31,7 @@ def read_images_from_folders(base_dir, output_dir):
                     # Read image
                     # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     img = cv.imread(file_path)
-                    img = Utils.gamma_correction(img, 0.7)
+                    # img = Utils.gamma_correction(img, 0.7)
                     img = Utils.adjust_image(img)
                     img = Utils.getMaskedHand(img)
                     # Calculate new size

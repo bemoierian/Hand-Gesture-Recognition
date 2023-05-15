@@ -14,10 +14,10 @@ from sklearn.decomposition import PCA
 
 # menPath = "../dataset_sample/men/"
 # womenPath = "../dataset_sample/Women/"
-menPath = "../Dataset_0-5/men/"
-womenPath = "../Dataset_0-5/Women/"
-# menPath = "../resized/men/"
-# womenPath = "../resized/Women/"
+# menPath = "../Dataset_0-5/men/"
+# womenPath = "../Dataset_0-5/Women/"
+menPath = "../resized/men/"
+womenPath = "../resized/Women/"
 inputImgs = []
 hogFeatures = []
 y = []
@@ -36,22 +36,22 @@ def read_images_from_folders(base_dir):
                 if os.path.isfile(file_path) and file_extension.lower() in ['.jpg', '.jpeg', '.png']:
                     print(f"Reading {file_name}")
                     # ------------------Read image---------------
-                    img = cv.imread(file_path)
+                    img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     # ------------------Preprocessing---------------
-                    img = Utils.adjust_image(img)
-                    img = Utils.getMaskedHand(img)
-                    # Calculate new size
-                    h, w = img.shape[:2]
-                    new_height = int(h * img_width / w)
-                    img_size = (img_width, new_height)
-                    resized = cv.resize(img, img_size)
-                    # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-                    NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+                    # img = Utils.adjust_image(img)
+                    # img = Utils.getMaskedHand(img)
+                    # # Calculate new size
+                    # h, w = img.shape[:2]
+                    # new_height = int(h * img_width / w)
+                    # img_size = (img_width, new_height)
+                    # resized = cv.resize(img, img_size)
+                    # # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
+                    # NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
                     # ------------------Append to list---------------
-                    inputImgs.append(NormalizedImg)
+                    inputImgs.append(img)
                     y.append(int(class_name))
                 # i = i + 1
-                # if i > 5:
+                # if i > 40:
                 #     break
 
 # -----------------------READ IMAGES----------------
@@ -86,12 +86,14 @@ for img in trainingImgs:
 print("PCA...")
 pca = PCA(n_components=0.83)
 pcaModel = pca.fit(hogFeatures)
+print(f"PCA components: {pcaModel.n_components_}")
 print(f"Success")
 print(f"Saving pca model")
 # save the model to disk
 filename1 = 'pca.sav'
 pickle.dump(pcaModel, open(filename1, 'wb'))
 hogFeatures = pcaModel.transform(hogFeatures)
+print(f"size of hogFeatures: {hogFeatures.shape}")
 print(f"Success")
 # ----------------------Train SVM---------------------
 print(f"Training SVM model...")
