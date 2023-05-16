@@ -1,9 +1,9 @@
 import os
-import numpy as np
+# import numpy as np
 import cv2 as cv
-from sklearn import svm
+# from sklearn import svm
 from utils import Utils
-from sklearn.decomposition import PCA
+# from sklearn.decomposition import PCA
 import time
 
 inputPath = "./data"
@@ -14,7 +14,7 @@ timeList = []
 img_width = 120
 def read_images_from_folders(base_dir):
     global inputImgs, img_width
-    for file_name in sorted(os.listdir(base_dir), key=Utils.extractInteger2):
+    for file_name in sorted(os.listdir(base_dir), key=Utils.extractInteger):
         file_path = os.path.join(base_dir, file_name)
         if os.path.isfile(file_path):
             print(f"Reading {file_name}")
@@ -50,12 +50,12 @@ for img in inputImgs:
     start = time.time()
     # ------------------Preprocessing---------------
     #  Reduce highlights and increase shadows
-    img = Utils.adjust_image(img)
+    # img = Utils.adjust_image(img)
     # Mask background and leave the hand in greyscale
     img = Utils.getMaskedHand(img)
     # Calculate new size
     h, w = img.shape[:2]
-    new_height = int(h * img_width / w)
+    new_height = 67
     img_size = (img_width, new_height)
     resized = cv.resize(img, img_size)
     NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)

@@ -47,7 +47,6 @@ def read_images_from_folders(base_dir):
                     # new_height = int(h * img_width / w)
                     # img_size = (img_width, new_height)
                     # resized = cv.resize(img, img_size)
-                    # # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
                     # NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
                     # ------------------Append to list---------------
                     inputImgs.append(img)
