@@ -349,7 +349,8 @@ class Utils:
         # Load the image
         # start_time = time.time()
         h, w = img.shape[:2]
-        new_height = int(h * img_width / w)
+        new_height = 67
+        # new_height = int(h * img_width / w)
         img_size = (img_width, new_height)
         img = cv.resize(img, img_size)    # resize image
 

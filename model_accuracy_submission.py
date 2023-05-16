@@ -14,7 +14,7 @@ timeList = []
 img_width = 120
 def read_images_from_folders(base_dir):
     global inputImgs, img_width
-    for file_name in sorted(os.listdir(base_dir), key=Utils.extractInteger2):
+    for file_name in sorted(os.listdir(base_dir), key=Utils.extractInteger):
         file_path = os.path.join(base_dir, file_name)
         if os.path.isfile(file_path):
             print(f"Reading {file_name}")
@@ -52,15 +52,15 @@ for img in inputImgs:
     #  Reduce highlights and increase shadows
     img = Utils.adjust_image(img)
     # Mask background and leave the hand in greyscale
-    img = Utils.getMaskedHand(img)
+    img = Utils.extract_hand(img, img_width)
     # Calculate new size
-    h, w = img.shape[:2]
-    new_height = int(h * img_width / w)
-    img_size = (img_width, new_height)
-    resized = cv.resize(img, img_size)
-    NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+    # h, w = img.shape[:2]
+    # new_height = int(h * img_width / w)
+    # img_size = (img_width, new_height)
+    # resized = cv.resize(img, img_size)
+    # normalizedImg = cv.normalize(img, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
     # ----------------------hog-----------------------
-    features = hog.compute(NormalizedImg)
+    features = hog.compute(img)
     # ----------------------PCA-----------------------
     features =  pcaModel.transform([features])
     # -------------------SVM Predict------------------
