@@ -63,7 +63,7 @@ print("Reading women images...")
 read_images_from_folders(womenPath)
 print(f"Success")
 # ----------------SPLIT TRAINING AND TEST SET----------------
-# best random_state++ till now: 74, 693
+# best random_state till now: 74, 693
 trainingImgs, testImgs, y_train, y_test = train_test_split(inputImgs, y, test_size=0.2, random_state=693)
 print(f"Training images: {len(trainingImgs)}")
 print(f"Test images: {len(testImgs)}")
@@ -74,12 +74,10 @@ block_size = (16, 16)
 block_stride = (8, 8)
 cell_size = (8, 8)
 nbins = 9
-
 # Create HOG descriptor
 hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
-# hog = cv.HOGDescriptor()
 for img in trainingImgs:
-    # hog from opencv
+    # -----------------hog------------------
     features = hog.compute(img)
     hogFeatures.append(features)
 

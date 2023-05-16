@@ -1,9 +1,9 @@
 import os
-import numpy as np
+# import numpy as np
 import cv2 as cv
-from sklearn import svm
+# from sklearn import svm
 from utils import Utils
-from sklearn.decomposition import PCA
+# from sklearn.decomposition import PCA
 import time
 
 inputPath = "./data"
@@ -50,7 +50,7 @@ for img in inputImgs:
     start = time.time()
     # ------------------Preprocessing---------------
     #  Reduce highlights and increase shadows
-    img = Utils.adjust_image(img)
+    # img = Utils.adjust_image(img)
     # Mask background and leave the hand in greyscale
     img = Utils.extract_hand(img, img_width)
     # Calculate new size
