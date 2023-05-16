@@ -5,10 +5,10 @@ import numpy as np
 
 # menPath = "../resized/men/"
 # womenPath = "../resized/Women/"
-# menPath = "../Dataset_0-5/men/"
-menPath = "data"
-# womenPath = "../Dataset_0-5/Women/"
-testImgPath = "../"
+menPath = "../Dataset_0-5/men/"
+# menPath = "data"
+womenPath = "../Dataset_0-5/Women/"
+# testImgPath = "../"
 outputPath = "../thresholded_images/"
 # sift = cv.SIFT_create()
 # Set desired image size
@@ -21,15 +21,15 @@ for i in range(1, 10):
     img = Utils.adjust_image(img)
     img = Utils.extract_hand(img, img_width)
     # img = Utils.getMaskedHand(img)
-    h, w = img.shape[:2]
-    # new_height = int(h * img_width / w)
-    new_height = 67
-    img_size = (img_width, new_height)
-    resized = cv.resize(img, img_size)    # Convert to grayscale
+    # h, w = img.shape[:2]
+    # # new_height = int(h * img_width / w)
+    # new_height = 67
+    # img_size = (img_width, new_height)
+    # resized = cv.resize(img, img_size)    # Convert to grayscale
     # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
     # img = Utils.skin_color_thresholding(img)
-    img = cv.normalize(resized, None, 0, 255,
-                       cv.NORM_MINMAX).astype('uint8')
+    # img = cv.normalize(img, None, 0, 255,
+    #                    cv.NORM_MINMAX).astype('uint8')
     # img = Utils.getThresholdedHand(img)
     # img = Utils.getMaskedHand(img)
     # kp, descriptor = sift.detectAndCompute(img, None)

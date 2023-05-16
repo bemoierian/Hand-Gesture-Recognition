@@ -50,7 +50,7 @@ for img in inputImgs:
     start = time.time()
     # ------------------Preprocessing---------------
     #  Reduce highlights and increase shadows
-    # img = Utils.adjust_image(img)
+    img = Utils.adjust_image(img)
     # Mask background and leave the hand in greyscale
     img = Utils.extract_hand(img, img_width)
     # Calculate new size
@@ -59,8 +59,9 @@ for img in inputImgs:
     # img_size = (img_width, new_height)
     # resized = cv.resize(img, img_size)
     # normalizedImg = cv.normalize(img, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     # ----------------------hog-----------------------
-    features = hog.compute(img)
+    features = hog.compute(gray)
     # ----------------------PCA-----------------------
     features =  pcaModel.transform([features])
     # -------------------SVM Predict------------------

@@ -408,6 +408,8 @@ class Utils:
         # Apply mask to original image to extract hand
         result1 = cv.bitwise_and(img, img, mask=mask1)
         result2 = cv.bitwise_and(img, img, mask=mask2)
+        # result11 = cv.bitwise_and(img, img, mask=mask1)
+        # result22 = cv.bitwise_and(img, img, mask=mask2)
 
         mean1 = np.mean(result1)
         mean2 = np.mean(result2)
