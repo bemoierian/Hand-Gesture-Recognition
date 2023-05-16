@@ -165,7 +165,9 @@ print(hogFeatures.shape)
 print(len(y_train))
 print(hogFeaturesTest.shape)
 print(len(y_test))
-# Build model
+
+
+# Build Neural Network model
 model = keras.Sequential(
     [
         keras.layers.Dense(
@@ -173,7 +175,6 @@ model = keras.Sequential(
             activation="relu",
             input_shape=(None, hogFeatures.shape[1]),
         ),
-        keras.layers.Dense(128, activation="relu"),
         keras.layers.Dense(6, activation="softmax"),
     ]
 )
