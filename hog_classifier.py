@@ -38,7 +38,8 @@ def read_images_from_folders(base_dir):
                     # ------------------Read image---------------
                     img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     # ------------------Preprocessing---------------
-                    # img = Utils.adjust_image(img)
+                    img = Utils.adjust_image(img)
+                    img = Utils.extract_hand(img, img_width)
                     # img = Utils.getMaskedHand(img)
                     # # Calculate new size
                     # h, w = img.shape[:2]

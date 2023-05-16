@@ -13,13 +13,13 @@ outputPath = "../thresholded_images/"
 # Set desired image size
 img_width = 256
 label = 2
-for i in range(31, 50):
+for i in range(1, 10):
     class_dir = os.path.join(menPath, f"{label}")
     imgPath = os.path.join(class_dir, f'{label}_men ({i}).JPG')
     img = cv.imread(imgPath)
-    img = Utils.gamma_correction(img, 0.5)
     img = Utils.adjust_image(img)
-    img = Utils.getMaskedHand(img)
+    img = Utils.extract_hand(img, img_width)
+    # img = Utils.getMaskedHand(img)
     h, w = img.shape[:2]
     new_height = int(h * img_width / w)
     img_size = (img_width, new_height)
@@ -27,9 +27,9 @@ for i in range(31, 50):
     # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
     # img = Utils.skin_color_thresholding(img)
     img = cv.normalize(resized, None, 0, 255,
-                                       cv.NORM_MINMAX).astype('uint8')
+                       cv.NORM_MINMAX).astype('uint8')
     # img = Utils.getThresholdedHand(img)
-    # img = Utils.getMaskedHand(img) 
+    # img = Utils.getMaskedHand(img)
     # kp, descriptor = sift.detectAndCompute(img, None)
     # print(f"descriptor shape {descriptor.shape}")
     # img2 = cv.drawKeypoints(img,kp,None,(255,0,0),4)
@@ -46,7 +46,6 @@ for i in range(31, 50):
     # kp, descriptor = sift.detectAndCompute(img, None)
     # # print(f"descriptor shape {descriptor.shape}")
     # img2 = cv.drawKeypoints(img,kp,None,(255,0,0),4)
-
 
     outPath = os.path.join(outputPath, f'{label}_men ({i})1.JPG')
     cv.imwrite(outPath, img)
