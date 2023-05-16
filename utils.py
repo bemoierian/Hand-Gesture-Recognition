@@ -406,13 +406,13 @@ class Utils:
         mask2 = cv.dilate(mask2, kernel, iterations=1)
 
         # Apply mask to original image to extract hand
-        result1 = cv.bitwise_and(img, img, mask=mask1)
-        result2 = cv.bitwise_and(img, img, mask=mask2)
-        # result11 = cv.bitwise_and(img, img, mask=mask1)
-        # result22 = cv.bitwise_and(img, img, mask=mask2)
+        # result1 = cv.bitwise_and(img, img, mask=mask1)
+        # result2 = cv.bitwise_and(img, img, mask=mask2)
+        result11 = cv.bitwise_and(img, img, mask=mask1)
+        result22 = cv.bitwise_and(img, img, mask=mask2)
 
-        mean1 = np.mean(result1)
-        mean2 = np.mean(result2)
+        mean1 = np.mean(result11)
+        mean2 = np.mean(result22)
         print(mean1, mean2)
         if mean1 > mean2:
             result = result1
