@@ -3,6 +3,8 @@ from sklearn.metrics import accuracy_score
 import os
 # import numpy as np
 from utils import Utils
+import time
+
 import pickle
 print("Success")
 y_true = []
@@ -45,11 +47,13 @@ n_clusters = 1600
 # -----------------------READ IMAGES----------------
 print("Reading input images...")
 read_images_from_folders(set1Path)
+read_images_from_folders(set2Path)
 print(f"Success")
 # -------------------------SIFT----------------------------
 sift = cv.SIFT_create()
 for i in range(len(inputImgs)):
     img = inputImgs[i]
+    start = time.time()
     # ------------------Preprocessing---------------
     #  Reduce highlights and increase shadows
     img = Utils.adjust_image(img)
@@ -60,19 +64,19 @@ for i in range(len(inputImgs)):
     kp, descriptor = sift.detectAndCompute(gray, None)
     # Produce "bag of words" vector
     descriptor = k_means.predict(descriptor)
-    # print(f"SIFT {g}/{i}")
     vq = [0] * n_clusters
     for feature in descriptor:
         vq[feature] = vq[feature] + 1  # load the model from disk
     bagOfWords.append(vq)
-    # append true class
-    # Predict the result
+    # --------------------Predict-------------------
     predictedClass = int(clf.predict([vq])[0])
+    end = time.time()
     y_predict.append(predictedClass)
-    print(f"Predicted class: {predictedClass}, True class: {y_true[i]}")
+    print(f"Predicted: {predictedClass}, True: {y_true[i]}")
+    timeTaken = end - start
+    timeList.append(timeTaken)
 
     # Draw predicted class on image and save it
-    cv.rectangle(img, (5, 5), (500, 100), (175, 0, 175), cv.FILLED)
     cv.putText(img, f'{predictedClass}', (40, 80),
                     cv.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 6)
     outPath = os.path.join(

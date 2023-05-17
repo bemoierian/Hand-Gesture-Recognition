@@ -56,6 +56,7 @@ print(f"Success")
 # -----------------------READ IMAGES----------------
 print("Reading input images...")
 read_images_from_folders(set1Path)
+read_images_from_folders(set2Path)
 print(f"Success")
 # -------------------------HOG----------------------------
 print("Preprocessing - HOG - PCA - Prediction...")

@@ -14,10 +14,10 @@ from sklearn.decomposition import PCA
 
 # menPath = "../dataset_sample/men/"
 # womenPath = "../dataset_sample/Women/"
-menPath = "../Dataset_0-5/men/"
-womenPath = "../Dataset_0-5/Women/"
-# menPath = "../resized/men/"
-# womenPath = "../resized/Women/"
+# menPath = "../Dataset_0-5/men/"
+# womenPath = "../Dataset_0-5/Women/"
+menPath = "../resized/men/"
+womenPath = "../resized/Women/"
 inputImgs = []
 hogFeatures = []
 
@@ -37,20 +37,20 @@ def read_images_from_folders(base_dir):
                 if os.path.isfile(file_path) and file_extension.lower() in ['.jpg', '.jpeg', '.png']:
                     print(f"Reading {file_name}")
                     # ------------------Read image---------------
-                    img = cv.imread(file_path)
+                    img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     # ------------------Preprocessing---------------
-                    img = Utils.adjust_image(img)
-                    img = Utils.extract_hand(img,True ,img_width)
+                    # img = Utils.adjust_image(img)
+                    # img = Utils.extract_hand(img,True ,img_width)
                     # img = Utils.getMaskedHand(img)
                     # # Calculate new size
                     # h, w = img.shape[:2]
                     # new_height = int(h * img_width / w)
                     # img_size = (img_width, new_height)
                     # resized = cv.resize(img, img_size)
-                    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                    # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
                     # NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
                     # ------------------Append to list---------------
-                    inputImgs.append(gray)
+                    inputImgs.append(img)
                     y.append(int(class_name))
                 # i = i + 1
                 # if i > 40:
@@ -81,9 +81,9 @@ for img in trainingImgs:
     # -----------------hog------------------
     feature_hog = hog.compute(img)
     # -----------------LBP------------------
-    feature_lbp = Utils.get_9ULBP(img)
-    feature = np.concatenate((feature_hog, feature_lbp), axis=None)
-    hogFeatures.append(feature)
+    # feature_lbp = Utils.get_9ULBP(img)
+    # feature = np.concatenate((feature_hog, feature_lbp), axis=None)
+    hogFeatures.append(feature_hog)
 # ----------------------PCA---------------------
 print("PCA...")
 pca = PCA(n_components=0.83)
@@ -127,9 +127,9 @@ for img in testImgs:
      # -----------------hog------------------
     feature_hog = hog.compute(img)
     # -----------------LBP------------------
-    feature_lbp = Utils.get_9ULBP(img)
-    feature = np.concatenate((feature_hog, feature_lbp), axis=None)
-    hogFeaturesTest.append(feature)
+    # feature_lbp = Utils.get_9ULBP(img)
+    # feature = np.concatenate((feature_hog, feature_lbp), axis=None)
+    hogFeaturesTest.append(feature_hog)
 
     # ------------Predict---------------
     # predictedClass = int(clf.predict([features])[0])

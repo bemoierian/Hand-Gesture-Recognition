@@ -381,31 +381,15 @@ class Utils:
         img_ycrcb2 = cv.cvtColor(result2, cv.COLOR_BGR2YCrCb)
 
         # Define range of skin color in YCrCb color space
-        lower_skin = np.array([0, 135, 85], dtype=np.uint8)
-        upper_skin = np.array([255, 180, 135], dtype=np.uint8)
+        lower_skin = np.array([[[0, 135, 85]]], dtype=np.uint8)
+        upper_skin = np.array([[[255, 180, 135]]], dtype=np.uint8)
+        typicalSkinColorYCrCb = np.mean([lower_skin, upper_skin], axis=0)
 
-        # Extract skin color from image
-        mask1 = cv.inRange(img_ycrcb1, lower_skin, upper_skin)
-        mask2 = cv.inRange(img_ycrcb2, lower_skin, upper_skin)
+        l1 = gmm.predict(typicalSkinColorYCrCb[0,0,1:].reshape(1, -1))
+        l2 = gmm.predict(lower_skin[0,0,1:].reshape(1, -1))
+        l3 = gmm.predict(upper_skin[0,0,1:].reshape(1, -1))
 
-        # Apply morphological operations to remove noise from mask
-        kernel = np.ones((3, 3), np.uint8)
-        mask1 = cv.erode(mask1, kernel, iterations=1)
-        mask1 = cv.dilate(mask1, kernel, iterations=1)
-
-        mask2 = cv.erode(mask2, kernel, iterations=1)
-        mask2 = cv.dilate(mask2, kernel, iterations=1)
-
-        # Apply mask to original image to extract hand
-        # result1 = cv.bitwise_and(img, img, mask=mask1)
-        # result2 = cv.bitwise_and(img, img, mask=mask2)
-        result11 = cv.bitwise_and(img, img, mask=mask1)
-        result22 = cv.bitwise_and(img, img, mask=mask2)
-
-        mean1 = np.mean(result11)
-        mean2 = np.mean(result22)
-        # print(mean1, mean2)
-        if mean1 > mean2:
+        if (l1[0]==1 and l2[0]==1) or (l1[0]==1 and l3[0]==1) or (l3[0]==1 and l2[0]==1):
             result = result1
         else:
             result = result2
@@ -483,6 +467,8 @@ class Utils:
                 code |= (image[i+1,j-1] > center) << 1
                 code |= (image[i,j-1] > center) << 0
                 lbp[i-1,j-1] = Utils.convert_58ulbp_to_9ulbp(code)
+                # lbp[i-1,j-1] = code
         hist = cv.calcHist([lbp], [0], None, [9], [0, 9])
+        # hist = cv.calcHist([lbp], [0], None, [58], [0, 58])
         hist = cv.normalize(hist, hist).flatten()
         return hist

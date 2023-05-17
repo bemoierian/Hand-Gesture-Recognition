@@ -12,8 +12,10 @@ from sklearn.metrics import accuracy_score
 
 # menPath = "../dataset_sample/men/"
 # womenPath = "../dataset_sample/Women/"
-menPath = "../Dataset_0-5/men/"
-womenPath = "../Dataset_0-5/Women/"
+# menPath = "../Dataset_0-5/men/"
+# womenPath = "../Dataset_0-5/Women/"
+menPath = "../resized/men/"
+womenPath = "../resized/Women/"
 img = cv.imread(menPath + '0/0_men (1).jpg')
 sift = cv.SIFT_create()
 kp, descriptor = sift.detectAndCompute(img, None)
@@ -39,13 +41,13 @@ def read_images_from_folders(base_dir):
                     print(f"Reading --- {file_name}")
                     # Read image
                     # img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
-                    img = cv.imread(file_path)
+                    img = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
                     # ------------------Preprocessing---------------
-                    img = Utils.adjust_image(img)
-                    img = Utils.extract_hand(img,True ,img_width)
-                    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                    # img = Utils.adjust_image(img)
+                    # img = Utils.extract_hand(img,True ,img_width)
+                    # gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
                     # ------------------Append to list---------------
-                    inputImgs.append(gray)
+                    inputImgs.append(img)
                     y.append(int(class_name))
 
                 # i = i + 1
