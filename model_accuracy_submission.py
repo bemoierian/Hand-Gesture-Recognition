@@ -36,77 +36,34 @@ print("Reading input images...")
 read_images_from_folders(inputPath)
 print(f"Success")
 # -------------------------HOG----------------------------
-# print("Preprocessing - HOG - PCA - Prediction...")
-# # Set HOG parameters
-# win_size = (64, 64)
-# block_size = (16, 16)
-# block_stride = (8, 8)
-# cell_size = (8, 8)
-# nbins = 9
-# # Create HOG descriptor
-# hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
-# for img in inputImgs:
-#     start = time.time()
-#     # ------------------Preprocessing---------------
-#     #  Reduce highlights and increase shadows
-#     img = Utils.adjust_image(img)
-#     # Mask background and leave the hand in greyscale
-#     img = Utils.extract_hand(img,False, img_width)
-#     # Calculate new size
-#     # h, w = img.shape[:2]
-#     # new_height = int(h * img_width / w)
-#     # img_size = (img_width, new_height)
-#     # resized = cv.resize(img, img_size)
-#     # normalizedImg = cv.normalize(img, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
-#     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-#     # ----------------------hog-----------------------
-#     features_hog = hog.compute(gray)
-#     # feature_lbp = Utils.get_9ULBP(gray)
-#     # features = np.concatenate((features_hog, feature_lbp), axis=None)
-#     # ----------------------PCA-----------------------
-#     features =  pcaModel.transform([features_hog])
-#     # -------------------SVM Predict------------------
-#     predictedClass = int(clf.predict(features)[0])
-#     end = time.time()
-#     timeTaken = end - start
-#     timeList.append(timeTaken)
-#     y_predict.append(predictedClass)
-
-# -------------------------SIFT----------------------------
-bagOfWords = []
-sift = cv.SIFT_create()
-# ----------------------Load SVM---------------------
-filename2 = 'SIFT_SVM_model.sav'
-clf = pickle.load(open(filename2, 'rb'))
-print(f"Success")
-# --------------------Load kmeans-------------------
-k_means = Utils.loadKmeansModel()
-print("Success")
-n_clusters = 1600
-print("Preprocessing - SIFT - Kmeans - SVM - Prediction...")
-for i in range(len(inputImgs)):
-    img = inputImgs[i]
+print("Preprocessing - HOG - PCA - Prediction...")
+# Set HOG parameters
+win_size = (64, 64)
+block_size = (16, 16)
+block_stride = (8, 8)
+cell_size = (8, 8)
+nbins = 9
+# Create HOG descriptor
+hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
+for img in inputImgs:
     start = time.time()
     # ------------------Preprocessing---------------
-    #  Reduce highlights and increase shadows
-    img = Utils.adjust_image(img)
     # Mask background and leave the hand in greyscale
     img = Utils.extract_hand(img,False, img_width)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    # Feature extraction
-    kp, descriptor = sift.detectAndCompute(gray, None)
-    # Produce "bag of words" vector
-    descriptor = k_means.predict(descriptor)
-    vq = [0] * n_clusters
-    for feature in descriptor:
-        vq[feature] = vq[feature] + 1  # load the model from disk
-    bagOfWords.append(vq)
-    # --------------------Predict-------------------
-    predictedClass = int(clf.predict([vq])[0])
+    # ----------------------hog-----------------------
+    features_hog = hog.compute(gray)
+    feature_lbp = Utils.get_9ULBP(gray)
+    features = np.concatenate((features_hog, feature_lbp), axis=None)
+    # ----------------------PCA-----------------------
+    features =  pcaModel.transform([features])
+    # -------------------SVM Predict------------------
+    predictedClass = int(clf.predict(features)[0])
     end = time.time()
-    y_predict.append(predictedClass)
     timeTaken = end - start
     timeList.append(timeTaken)
+    y_predict.append(predictedClass)
+
 # ----------------Save output to files--------------
 print("Saving output to files...")
 f = open("results.txt", "w")

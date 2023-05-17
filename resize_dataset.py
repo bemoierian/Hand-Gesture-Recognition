@@ -34,15 +34,14 @@ def read_images_from_folders(base_dir, output_dir):
                     # img = Utils.gamma_correction(img, 0.7)
                     # img = Utils.adjust_image(img)
                     # img = Utils.getMaskedHand(img)
-                    # # Calculate new size
+                    # Calculate new size
                     # h, w = img.shape[:2]
                     # new_height = int(h * img_width / w)
                     # img_size = (img_width, new_height)
                     # resized = cv.resize(img, img_size)
-                    # # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
                     # NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
                     
-                    img = Utils.adjust_image(img)
+                    # img = Utils.adjust_image(img)
                     img = Utils.extract_hand(img,True ,img_width)
                     # img = Utils.getMaskedHand(img)
                     # # Calculate new size

@@ -81,9 +81,9 @@ for img in trainingImgs:
     # -----------------hog------------------
     feature_hog = hog.compute(img)
     # -----------------LBP------------------
-    # feature_lbp = Utils.get_9ULBP(img)
-    # feature = np.concatenate((feature_hog, feature_lbp), axis=None)
-    hogFeatures.append(feature_hog)
+    feature_lbp = Utils.get_9ULBP(img)
+    feature = np.concatenate((feature_hog, feature_lbp), axis=None)
+    hogFeatures.append(feature)
 # ----------------------PCA---------------------
 print("PCA...")
 pca = PCA(n_components=0.83)
@@ -101,11 +101,6 @@ print(f"Success")
 print(f"Training SVM model...")
 clf = svm.SVC(decision_function_shape='ovo')
 clf.fit(hogFeatures, y_train)
-
-# ----------------------Train AdaBoost---------------------
-# print(f"Training AdaBoost model...")
-# clf = AdaBoostClassifier(n_estimators=1000, random_state=0)
-# clf.fit(hogFeatures, y_train)
 
 print(f"Success")
 
@@ -127,21 +122,10 @@ for img in testImgs:
      # -----------------hog------------------
     feature_hog = hog.compute(img)
     # -----------------LBP------------------
-    # feature_lbp = Utils.get_9ULBP(img)
-    # feature = np.concatenate((feature_hog, feature_lbp), axis=None)
-    hogFeaturesTest.append(feature_hog)
+    feature_lbp = Utils.get_9ULBP(img)
+    feature = np.concatenate((feature_hog, feature_lbp), axis=None)
+    hogFeaturesTest.append(feature)
 
-    # ------------Predict---------------
-    # predictedClass = int(clf.predict([features])[0])
-    # y_predict.append(predictedClass)
-    # print(f"Predicted: {predictedClass}, True: {y_test[i]}")
-
-    # # -----------Draw predicted class on image and save it----------
-    # cv.putText(testImgs[i], f'{predictedClass}', (40, 80),
-    #                 cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 6)
-    # outPath = os.path.join(
-    #     outputPath, f'{y_test[i]}_{predictedClass} ({i}).JPG')
-    # cv.imwrite(outPath, testImgs[i])
 hogFeaturesTest =  pcaModel.transform(hogFeaturesTest)
 y_predict = clf.predict(hogFeaturesTest)
 

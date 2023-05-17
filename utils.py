@@ -81,27 +81,27 @@ class Utils:
     @staticmethod
     def getMaskedHand(frame):
         # # ------------Thresholding method 1-----------------
-        # Convert image to HSV
-        hsvim = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-        # Lower boundary of skin color in HSV
-        # lower = np.array([0, 20, 70], dtype="uint8")
-        lower = np.array([0, 48, 80], dtype="uint8")
-        # Upper boundary of skin color in HSV
-        upper = np.array([20, 255, 255], dtype="uint8")
-        skinMask = cv.inRange(hsvim, lower, upper)
-        # Gaussian filter (blur) to remove noise
-        skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
+        # # Convert image to HSV
+        # hsvim = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+        # # Lower boundary of skin color in HSV
+        # # lower = np.array([0, 20, 70], dtype="uint8")
+        # lower = np.array([0, 48, 80], dtype="uint8")
+        # # Upper boundary of skin color in HSV
+        # upper = np.array([20, 255, 255], dtype="uint8")
+        # skinMask = cv.inRange(hsvim, lower, upper)
+        # # Gaussian filter (blur) to remove noise
+        # skinMask = cv.GaussianBlur(skinMask, (17, 17), 0)
 
         # ------------Thresholding method 2-----------------
-        # threshImg = Utils.skin_color_thresholding(frame)
-        # threshImg = cv.normalize(threshImg, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
+        threshImg = Utils.skin_color_thresholding(frame)
+        threshImg = cv.normalize(threshImg, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
         # print(f"threshImg shape {threshImg.shape}")
         # print(f"threshImg: {threshImg}")
 
 
         greyImg = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         # print(f"greyImg shape {greyImg.shape}")
-        masked = cv.bitwise_and(greyImg, greyImg, mask=skinMask)
+        masked = cv.bitwise_and(greyImg, greyImg, mask=threshImg)
         # maskedBlurred = cv.GaussianBlur(masked, (41, 41), 0)
         return masked
 
@@ -389,7 +389,7 @@ class Utils:
         l2 = gmm.predict(lower_skin[0,0,1:].reshape(1, -1))
         l3 = gmm.predict(upper_skin[0,0,1:].reshape(1, -1))
 
-        if (l1[0]==1 and l2[0]==1) or (l1[0]==1 and l3[0]==1) or (l3[0]==1 and l2[0]==1):
+        if (l1[0]==1 and l2[0]==1) and l3[0]==1:
             result = result1
         else:
             result = result2
