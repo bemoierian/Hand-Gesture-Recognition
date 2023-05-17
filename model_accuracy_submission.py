@@ -62,10 +62,10 @@ for img in inputImgs:
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     # ----------------------hog-----------------------
     features_hog = hog.compute(gray)
-    feature_lbp = Utils.get_9ULBP(gray)
-    features = np.concatenate((features_hog, feature_lbp), axis=None)
+    # feature_lbp = Utils.get_9ULBP(gray)
+    # features = np.concatenate((features_hog, feature_lbp), axis=None)
     # ----------------------PCA-----------------------
-    features =  pcaModel.transform([features])
+    features =  pcaModel.transform([features_hog])
     # -------------------SVM Predict------------------
     predictedClass = int(clf.predict(features)[0])
     end = time.time()

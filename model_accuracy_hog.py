@@ -4,7 +4,7 @@ import os
 import numpy as np
 from utils import Utils
 from sklearn.decomposition import PCA
-
+import time
 # from skimage.feature import hog
 
 # Load SVM model
@@ -12,10 +12,9 @@ clf = Utils.loadSVMModel()
 print("Success")
 y_true = []
 y_predict = []
-menPath = "../Dataset_0-5/men/"
-womenPath = "../Dataset_0-5/Women/"
+set1Path = "../Set1/"
+set2Path = "../Set2/"
 outputPath = "../predicted_images/"
-testImgs = []
 
 # Compute HOG features
 # Set HOG parameters
@@ -26,76 +25,97 @@ cell_size = (8, 8)
 nbins = 9
 
 # # Create HOG descriptor
-# hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
-hog = cv.HOGDescriptor()
-img_width = 256
+hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
 
-# Load PCA model
-# pcaModel = Utils.loadPCAModel()
-# print(f"Success")
-def processImages(imgsPath, classeStartIndex, classeEndIndex, imgStartIndex, imgEndIndex):
-    global menPath, womenPath, y_true, y_predict, clf, outputPath, hog, testImgs
-    for g in range(classeStartIndex, classeEndIndex):
-        if imgsPath == menPath:
-            print(f"Men {g}")
-        else:
-            print(f"Women {g}")
-        class_dir = os.path.join(imgsPath, f"{g}")
-        for i in range(imgStartIndex, imgEndIndex):
-            # Read image
-            imgPath = os.path.join(
-                class_dir, f'{g}{"_men" if imgsPath == menPath else "_woman"} ({i}).JPG')
-            if os.path.isfile(imgPath):
-                img = cv.imread(imgPath)
-                img = Utils.getMaskedHand(img)
-                # Calculate new size
-                h, w = img.shape[:2]
-                new_height = int(h * img_width / w)
-                img_size = (img_width, new_height)
-                resized = cv.resize(img, img_size)
-                # gray = cv.cvtColor(resized, cv.COLOR_BGR2GRAY)
-                NormalizedImg = cv.normalize(resized, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+inputImgs = []
+timeList = []
 
-                # testImgs.append(NormalizedImg)
-                # fd, hog_image = hog(img, orientations=8, pixels_per_cell=(16, 16),
-                #             cells_per_block=(1, 1), visualize=True, channel_axis=-1)
-                features = hog.compute(NormalizedImg)
-                # featuresHog =  pcaModel.transform([featuresHog])
+img_width = 128
+def read_images_from_folders(base_dir):
+    global inputImgs, y_true, img_width
+    for class_name in os.listdir(base_dir):
+        class_dir = os.path.join(base_dir, class_name)
+        if os.path.isdir(class_dir):
+            for file_name in os.listdir(class_dir):
+                file_path = os.path.join(class_dir, file_name)
+                (file_base_name, file_extension) = os.path.splitext(file_path)
+                if os.path.isfile(file_path) and file_extension.lower() in ['.jpg', '.jpeg', '.png']:
+                    print(f"Reading {class_name}/{file_name}")
+                    # ------------------Read image---------------
+                    img = cv.imread(file_path)
+                    # ------------------Append to list---------------
+                    inputImgs.append(img)
+                    y_true.append(int(class_name))
 
-                # features, hog_image = hog(NormalizedImg, orientations=8, pixels_per_cell=(16, 16),
-                #             cells_per_block=(1, 1), visualize=True)
+# ----------------------Load PCA---------------------
+pcaModel = Utils.loadPCAModel()
+print(f"Success")
+# ----------------------Load SVM---------------------
+clf = Utils.loadSVMModel()
+print(f"Success")
+# -----------------------READ IMAGES----------------
+print("Reading input images...")
+read_images_from_folders(set1Path)
+print(f"Success")
+# -------------------------HOG----------------------------
+print("Preprocessing - HOG - PCA - Prediction...")
+# Set HOG parameters
+win_size = (64, 64)
+block_size = (16, 16)
+block_stride = (8, 8)
+cell_size = (8, 8)
+nbins = 9
+# Create HOG descriptor
+hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
+for i in range(len(inputImgs)):
+    img = inputImgs[i]
+    start = time.time()
+    # ------------------Preprocessing---------------
+    #  Reduce highlights and increase shadows
+    img = Utils.adjust_image(img)
+    # Mask background and leave the hand in greyscale
+    img = Utils.extract_hand(img,False, img_width)
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    # img = Utils.getMaskedHand(img)
+    # # Calculate new size
+    # h, w = img.shape[:2]
+    # new_height = 72
+    # img_size = (img_width, new_height)
+    # resized = cv.resize(img, img_size)
+    # ----------------------hog-----------------------
+    features_hog = hog.compute(gray)
+    # ----------------------LBP-----------------------
+    # feature_lbp = Utils.get_9ULBP(gray)
+    # features = np.concatenate((features_hog, feature_lbp), axis=None)
+    # ----------------------PCA-----------------------
+    features =  pcaModel.transform([features_hog])
+    # -------------------SVM Predict------------------
+    predictedClass = int(clf.predict(features)[0])
+    end = time.time()
+    timeTaken = end - start
+    timeList.append(timeTaken)
+    y_predict.append(predictedClass)
+    print(f"Predicted: {predictedClass}, True: {y_true[i]}")
+    # ---------Draw predicted class on image and save it-------------
+    cv.putText(gray, f'{predictedClass}', (20, 40),
+                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 6)
+    outPath = os.path.join(
+        outputPath, f'{y_true[i]}_({i}).JPG')
+    cv.imwrite(outPath, gray)
 
-                # append true class
-                y_true.append(g)
 
-                # Predict the result
-                predictedClass = int(clf.predict([features])[0])
-                y_predict.append(predictedClass)
-                print(f"{i} Predicted: {predictedClass}, True: {g}")
+# ----------------Save output to files--------------
+# print("Saving output to files...")
+# f = open("results.txt", "w")
+# for i in range(len(y_predict)):
+#     f.write(f"{y_predict[i]}\n")
+# f.close()
 
-                # Draw predicted class on image and save it
-                # cv.rectangle(NormalizedImg, (5, 5), (500, 100), (175, 0, 175), cv.FILLED)
-                cv.putText(NormalizedImg, f'{predictedClass}', (40, 80),
-                                cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 6)
-                outPath = os.path.join(
-                    outputPath, f'{g}{"_men" if imgsPath == menPath else "_woman"} ({i}).JPG')
-                cv.imwrite(outPath, NormalizedImg)
-            else:
-                break
+f = open("time.txt", "w")
+for i in range(len(timeList)):
+    timeList[i] = round(timeList[i], 3)
+    f.write(f"{timeList[i]}\n")
+f.close()
 
-processImages(menPath, 0, 6, 106, 140)
-processImages(womenPath, 0, 6, 106, 140)
-# for img in testImgs:
-#     # print(f"HOG {trainingImgs.index(img)}")
-#     features = hog.compute(img)
-#     # Predict the result
-#     predictedClass = int(clf.predict([features])[0])
-#     y_predict.append(predictedClass)
-#     print(f"Predicted class: {predictedClass}, True class: {g}")
-# accuracy =clf.score(bagOfWords, y_true)
-# print(f"Accuracy: {accuracy}")
-
-# print(f"y_true: {y_true}")
-# print(f"y_predict: {y_predict}")
 accuracy = accuracy_score(y_true, y_predict)
 print(f"Accuracy: {accuracy}")
