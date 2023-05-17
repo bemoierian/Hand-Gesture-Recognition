@@ -12,13 +12,13 @@ womenPath = "../Dataset_0-5/Women/"
 outputPath = "../thresholded_images/"
 # sift = cv.SIFT_create()
 # Set desired image size
-img_width = 120
-label = 2
+img_width = 480
+label = 0
 for i in range(1, 10):
     class_dir = os.path.join(menPath, f"{label}")
     imgPath = os.path.join(class_dir, f'{label}_men ({i}).JPG')
     img = cv.imread(imgPath)
-    img = Utils.adjust_image(img)
+    # img = Utils.adjust_image(img)
     img = Utils.extract_hand(img, img_width)
     # img = Utils.getMaskedHand(img)
     # h, w = img.shape[:2]

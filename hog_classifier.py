@@ -20,10 +20,11 @@ womenPath = "../Dataset_0-5/Women/"
 # womenPath = "../resized/Women/"
 inputImgs = []
 hogFeatures = []
+
 y = []
 # hog = cv.HOGDescriptor()
 # Set desired image width
-img_width = 120
+img_width = 128
 def read_images_from_folders(base_dir):
     global inputImgs, y, img_width
     for class_name in os.listdir(base_dir):
@@ -39,7 +40,7 @@ def read_images_from_folders(base_dir):
                     img = cv.imread(file_path)
                     # ------------------Preprocessing---------------
                     img = Utils.adjust_image(img)
-                    img = Utils.extract_hand(img, img_width)
+                    img = Utils.extract_hand(img,True ,img_width)
                     # img = Utils.getMaskedHand(img)
                     # # Calculate new size
                     # h, w = img.shape[:2]
@@ -78,9 +79,11 @@ nbins = 9
 hog = cv.HOGDescriptor(win_size, block_size, block_stride, cell_size, nbins)
 for img in trainingImgs:
     # -----------------hog------------------
-    features = hog.compute(img)
-    hogFeatures.append(features)
-
+    feature_hog = hog.compute(img)
+    # -----------------LBP------------------
+    feature_lbp = Utils.get_9ULBP(img)
+    feature = np.concatenate((feature_hog, feature_lbp), axis=None)
+    hogFeatures.append(feature)
 # ----------------------PCA---------------------
 print("PCA...")
 pca = PCA(n_components=0.83)
@@ -121,9 +124,12 @@ y_predict = []
 outputPath = "../predicted_images/"
 
 for img in testImgs:
-    # --------------hog-----------------
-    features = hog.compute(img)
-    hogFeaturesTest.append(features)
+     # -----------------hog------------------
+    feature_hog = hog.compute(img)
+    # -----------------LBP------------------
+    feature_lbp = Utils.get_9ULBP(img)
+    feature = np.concatenate((feature_hog, feature_lbp), axis=None)
+    hogFeaturesTest.append(feature)
 
     # ------------Predict---------------
     # predictedClass = int(clf.predict([features])[0])

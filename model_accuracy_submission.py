@@ -1,5 +1,5 @@
 import os
-# import numpy as np
+import numpy as np
 import cv2 as cv
 # from sklearn import svm
 from utils import Utils
@@ -11,7 +11,7 @@ inputImgs = []
 y_predict = []
 timeList = []
 
-img_width = 120
+img_width = 128
 def read_images_from_folders(base_dir):
     global inputImgs, img_width
     for file_name in sorted(os.listdir(base_dir), key=Utils.extractInteger):
@@ -52,7 +52,7 @@ for img in inputImgs:
     #  Reduce highlights and increase shadows
     img = Utils.adjust_image(img)
     # Mask background and leave the hand in greyscale
-    img = Utils.extract_hand(img, img_width)
+    img = Utils.extract_hand(img,False, img_width)
     # Calculate new size
     # h, w = img.shape[:2]
     # new_height = int(h * img_width / w)
@@ -61,7 +61,9 @@ for img in inputImgs:
     # normalizedImg = cv.normalize(img, None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     # ----------------------hog-----------------------
-    features = hog.compute(gray)
+    features_hog = hog.compute(gray)
+    feature_lbp = Utils.get_9ULBP(gray)
+    features = np.concatenate((features_hog, feature_lbp), axis=None)
     # ----------------------PCA-----------------------
     features =  pcaModel.transform([features])
     # -------------------SVM Predict------------------

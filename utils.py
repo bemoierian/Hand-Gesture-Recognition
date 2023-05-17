@@ -285,8 +285,8 @@ class Utils:
         labImg[mask] = np.array([255, 128, 128])
         labImg[(~mask)] = np.array([0, 128, 128])
         rgbImg2 = cv.cvtColor(labImg, cv.COLOR_LAB2RGB)
-        NormalizedImg = cv.normalize(rgbImg2, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX)
-        NormalizedImg2 = cv.normalize(NormalizedImg2, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX)
+        NormalizedImg = cv.normalize(rgbImg2, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX).astype(np.float32)
+        NormalizedImg2 = cv.normalize(rgbImg, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX).astype(np.float32)
 
         kernel = np.ones((13, 13), np.uint8)
         img_dilation = cv.dilate(NormalizedImg, kernel, iterations=1)
@@ -324,33 +324,24 @@ class Utils:
                                 avgB_without = np.mean(NormalizedImg2[i:i+21, j:j+21, 2][black_pixels[i:i+21, j:j+21]])
                                 # print("all",NormalizedImg2[i:i+21, j:j+21, 0][white_pixels[i:i+21, j:j+21]].shape)
                                 # the ratio between the average of the shadow region and the average of the non-shadow region
-                                # ratioR =avgR_shadow/avgR_without
-                                # ratioG = avgG_shadow / avgG_without
-                                # ratioB = avgB_shadow / avgB_without
+                                ratioR =avgR_shadow/avgR_without
+                                ratioG = avgG_shadow / avgG_without
+                                ratioB = avgB_shadow / avgB_without
                                 # print(ratioR, ratioG, ratioB)
-                                NormalizedImg2[i:i+21, j:j+21][white_pixels[i:i+21, j:j+21]] = np.array([avgR_shadow, avgG_shadow, avgB_shadow])
+                                NormalizedImg2[i:i+21, j:j+21][white_pixels[i:i+21, j:j+21]] *= np.array([ratioR, ratioG, ratioB])
                                 NormalizedImg2[i:i+21, j:j+21] = cv.medianBlur(NormalizedImg2[i:i+21, j:j+21], 5)
-                # replace the shadow pixels with the average of the shadow region
-        # NormalizedImg2[white_pixels] = np.array([avgR_shadow, avgG_shadow, avgB_shadow])
-        # the ratio between the average of the shadow region and the average of the non-shadow region
-        # ratioR =avgR_shadow/avgR_without
-        # ratioG = avgG_shadow / avgG_without
-        # ratioB = avgB_shadow / avgB_without
-        # print(ratioR, ratioG, ratioB)
-
-        # NormalizedImg2[white_pixels]= np.array([ratioR, ratioG, ratioB]) 
-        # To eliminate the over-illuminated pixels
-        # NormalizedImg2 = cv.medianBlur(NormalizedImg2, 17)
         return NormalizedImg2
 
 
     @staticmethod
-    def extract_hand(img,img_width=256):
+    def extract_hand(img,flag,img_width=256):
         # Load the image
-        # start_time = time.time()
+        # start_time = ti   me.time()
         h, w = img.shape[:2]
-        new_height = 67
-        # new_height = int(h * img_width / w)
+        if flag:
+            new_height = int(h * img_width / w)
+        else:
+            new_height = 72
         img_size = (img_width, new_height)
         img = cv.resize(img, img_size)    # resize image
 
@@ -413,11 +404,85 @@ class Utils:
 
         mean1 = np.mean(result11)
         mean2 = np.mean(result22)
-        print(mean1, mean2)
+        # print(mean1, mean2)
         if mean1 > mean2:
             result = result1
         else:
             result = result2
+        # Reshape the image to a 2D array of pixels and 3 color values (RGB)
+        rows, cols = result.shape[0], result.shape[1]
+        image_2d = result.reshape(rows*cols, 3)
+
+        # Perform k-means clustering with 3 clusters using OpenCV
+        criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        flags = cv.KMEANS_RANDOM_CENTERS
+        compactness, labels, centers = cv.kmeans(image_2d.astype(np.float32), 2, None, criteria, 10, flags)
+
+        # Reshape the labels back into the original image shape
+        labels_2d = labels.reshape(rows, cols)
+
+        # Get the pixel indices for each label
+        indices_0 = (labels_2d == 0)
+        indices_1 = (labels_2d == 1)
+        # Get a separate image for each cluster
+        result_0 = result.copy()
+        result_0[~indices_0] = 0
+
+        result_1 = result.copy()
+        result_1[~indices_1] = 0
+
+        mean_0 = np.mean(result_0)
+        mean_1 = np.mean(result_1)
+        # print(mean_0, mean_1)
+        if mean_1 > mean_0:
+            result_temp = result_1
+            # indices_temp = indices_1
+        else:
+            result_temp = result_0
+            # indices_temp = indices_0
+        #  Create a mask for the hand using the pixel indices of one of the clusters
+        # mask = np.zeros((rows, cols), dtype=bool)
+        # mask[indices_temp] = True
+
+        # # Apply the mask to the original image to get only the hand
+        # hand_image = np.zeros_like(result)
+        # hand_image[mask] = result[mask]
         # end_time = time.time()
-        # print("Time: ", end_time - start_time)
-        return result
+        # takenTime = end_time - start_time
+        # print("Time taken: ", takenTime)
+        return result_temp
+    
+    @staticmethod
+    def convert_58ulbp_to_9ulbp(code):
+        # Convert the code to binary
+        binary_code = bin(int(code))[2:].zfill(58)
+        
+        # Split the binary code into 9 parts of 6 bits each
+        parts = [binary_code[i:i+6] for i in range(0, len(binary_code), 6)]
+        
+        # Convert each part to decimal and concatenate them
+        decimal_code = ''.join([str(int(part, 2)) for part in parts])
+        
+        # Convert the decimal code to integer
+        return int(decimal_code)
+        
+    @staticmethod
+    def get_9ULBP(image):
+        height, width = image.shape[:2]
+        lbp = np.zeros((height-2, width-2), dtype=np.uint8)
+        for i in range(1, height-1):
+            for j in range(1, width-1):
+                center = image[i,j]
+                code = 0
+                code |= (image[i-1,j-1] > center) << 7
+                code |= (image[i-1,j] > center) << 6
+                code |= (image[i-1,j+1] > center) << 5
+                code |= (image[i,j+1] > center) << 4
+                code |= (image[i+1,j+1] > center) << 3
+                code |= (image[i+1,j] > center) << 2
+                code |= (image[i+1,j-1] > center) << 1
+                code |= (image[i,j-1] > center) << 0
+                lbp[i-1,j-1] = Utils.convert_58ulbp_to_9ulbp(code)
+        hist = cv.calcHist([lbp], [0], None, [9], [0, 9])
+        hist = cv.normalize(hist, hist).flatten()
+        return hist
