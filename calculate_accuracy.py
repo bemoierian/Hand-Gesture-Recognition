@@ -4,7 +4,7 @@ y_predict = []
 with open('results.txt', 'r') as file:
     for line in file:
         y_predict.append(int(line.strip()))
-with open('results_set_1.txt', 'r') as file:
+with open('results_set_2.txt', 'r') as file:
     for line in file:
         y_true.append(int(line.strip()))
 

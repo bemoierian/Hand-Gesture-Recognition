@@ -389,7 +389,7 @@ class Utils:
         l2 = gmm.predict(lower_skin[0,0,1:].reshape(1, -1))
         l3 = gmm.predict(upper_skin[0,0,1:].reshape(1, -1))
 
-        if (l1[0]==1 and l2[0]==1) and l3[0]==1:
+        if (l1[0]==1 and l2[0]==1) or (l1[0]==1 and l3[0]==1) or (l3[0]==1 and l2[0]==1):
             result = result1
         else:
             result = result2

@@ -73,7 +73,7 @@ for i in range(len(inputImgs)):
     start = time.time()
     # ------------------Preprocessing---------------
     #  Reduce highlights and increase shadows
-    img = Utils.adjust_image(img)
+    # img = Utils.adjust_image(img)
     # Mask background and leave the hand in greyscale
     img = Utils.extract_hand(img,False, img_width)
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -86,10 +86,10 @@ for i in range(len(inputImgs)):
     # ----------------------hog-----------------------
     features_hog = hog.compute(gray)
     # ----------------------LBP-----------------------
-    # feature_lbp = Utils.get_9ULBP(gray)
-    # features = np.concatenate((features_hog, feature_lbp), axis=None)
+    feature_lbp = Utils.get_9ULBP(gray)
+    features = np.concatenate((features_hog, feature_lbp), axis=None)
     # ----------------------PCA-----------------------
-    features =  pcaModel.transform([features_hog])
+    features =  pcaModel.transform([features])
     # -------------------SVM Predict------------------
     predictedClass = int(clf.predict(features)[0])
     end = time.time()
