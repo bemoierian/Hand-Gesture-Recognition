@@ -376,10 +376,6 @@ class Utils:
         result1 = cv.bitwise_and(img, img, mask=mask)
         result2 = cv.bitwise_and(img, img, mask=~(mask))
 
-        # Convert image to YCrCb color space
-        img_ycrcb1 = cv.cvtColor(result1, cv.COLOR_BGR2YCrCb)
-        img_ycrcb2 = cv.cvtColor(result2, cv.COLOR_BGR2YCrCb)
-
         # Define range of skin color in YCrCb color space
         lower_skin = np.array([[[0, 135, 85]]], dtype=np.uint8)
         upper_skin = np.array([[[255, 180, 135]]], dtype=np.uint8)
@@ -466,6 +462,7 @@ class Utils:
                 code |= (image[i+1,j] > center) << 2
                 code |= (image[i+1,j-1] > center) << 1
                 code |= (image[i,j-1] > center) << 0
+                # this code is for 58 ulbp
                 lbp[i-1,j-1] = Utils.convert_58ulbp_to_9ulbp(code)
                 # lbp[i-1,j-1] = code
         hist = cv.calcHist([lbp], [0], None, [9], [0, 9])
